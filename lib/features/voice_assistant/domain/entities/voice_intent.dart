@@ -1,0 +1,64 @@
+import 'package:equatable/equatable.dart';
+
+/// Every action the voice assistant can trigger across the app.
+///
+/// Kept as a sealed class (rather than scattering string checks through the
+/// UI) so every feature that wants to be voice-controllable just adds a case
+/// here and a handler in `VoiceCommandListener` — the interpreter stays the
+/// single source of truth for "what can be said".
+sealed class VoiceIntent extends Equatable {
+  const VoiceIntent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class NavigateHomeIntent extends VoiceIntent {
+  const NavigateHomeIntent();
+}
+
+class FindNearbyHospitalsIntent extends VoiceIntent {
+  const FindNearbyHospitalsIntent();
+}
+
+class ShowHospitalsOnMapIntent extends VoiceIntent {
+  const ShowHospitalsOnMapIntent();
+}
+
+class CallEmergencyIntent extends VoiceIntent {
+  const CallEmergencyIntent();
+}
+
+class OpenDoctorListIntent extends VoiceIntent {
+  const OpenDoctorListIntent();
+}
+
+class StartVideoCallIntent extends VoiceIntent {
+  const StartVideoCallIntent({this.doctorName});
+
+  final String? doctorName;
+
+  @override
+  List<Object?> get props => [doctorName];
+}
+
+class EndCallIntent extends VoiceIntent {
+  const EndCallIntent();
+}
+
+class StopListeningIntent extends VoiceIntent {
+  const StopListeningIntent();
+}
+
+class RepeatLastResponseIntent extends VoiceIntent {
+  const RepeatLastResponseIntent();
+}
+
+class UnknownIntent extends VoiceIntent {
+  const UnknownIntent(this.rawText);
+
+  final String rawText;
+
+  @override
+  List<Object?> get props => [rawText];
+}
