@@ -5,46 +5,58 @@ import 'package:ehealth/features/voice_assistant/presentation/providers/voice_as
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final voiceAssistantControllerProvider =
-    NotifierProvider<VoiceAssistantController, VoiceAssistantState>(VoiceAssistantController.new);
+    NotifierProvider<VoiceAssistantController, VoiceAssistantState>(
+      VoiceAssistantController.new,
+    );
 
-/// Owns the voice-assistant lifecycle: initializing the speech engine,
-/// starting/stopping listening, interpreting recognized speech into a
-/// [VoiceIntent] and exposing it as `pendingIntent` for the UI layer
-/// (`VoiceCommandListener`) to act on — e.g. navigating with go_router or
-/// triggering another feature's use case.
 class VoiceAssistantController extends Notifier<VoiceAssistantState> {
+  bool _continuousMode = false;
+
   @override
   VoiceAssistantState build() => const VoiceAssistantState();
 
   Future<void> toggleListening() async {
-    if (state.isListening) {
+    if (_continuousMode || state.isListening) {
       await stopListening();
     } else {
+      _continuousMode = true;
       await startListening();
     }
   }
 
   Future<void> startListening() async {
-    state = state.copyWith(status: VoiceStatus.initializing, clearError: true, transcript: '');
+    state = state.copyWith(
+      status: VoiceStatus.initializing,
+      clearError: true,
+      transcript: '',
+    );
 
-    final initResult = await ref.read(initializeVoiceEngineProvider).call(const NoParams());
+    final initResult = await ref
+        .read(initializeVoiceEngineProvider)
+        .call(const NoParams());
     final canListen = initResult.fold((_) => false, (available) => available);
     if (!canListen) {
+      _continuousMode = false;
       state = state.copyWith(
         status: VoiceStatus.error,
-        errorMessage: 'Voice recognition is not available. Check microphone permission.',
+        errorMessage:
+            'Voice recognition is not available. Check microphone permission.',
       );
       return;
     }
 
     final result = await ref.read(startListeningProvider).call(_onResult);
-    result.fold(
-      (failure) => state = state.copyWith(status: VoiceStatus.error, errorMessage: failure.message),
-      (_) => state = state.copyWith(status: VoiceStatus.listening),
-    );
+    result.fold((failure) {
+      _continuousMode = false;
+      state = state.copyWith(
+        status: VoiceStatus.error,
+        errorMessage: failure.message,
+      );
+    }, (_) => state = state.copyWith(status: VoiceStatus.listening));
   }
 
   Future<void> stopListening() async {
+    _continuousMode = false;
     await ref.read(stopListeningProvider).call(const NoParams());
     state = state.copyWith(status: VoiceStatus.idle);
   }
@@ -70,5 +82,6 @@ class VoiceAssistantController extends Notifier<VoiceAssistantState> {
     if (state.status == VoiceStatus.speaking) {
       state = state.copyWith(status: VoiceStatus.idle);
     }
+    if (_continuousMode) await startListening();
   }
 }
