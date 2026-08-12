@@ -23,6 +23,7 @@ import 'package:ehealth/features/splash/presentation/screens/splash_screen.dart'
 import 'package:ehealth/features/video_call/presentation/screens/doctor_list_screen.dart';
 import 'package:ehealth/features/video_call/presentation/screens/video_call_screen.dart';
 import 'package:ehealth/features/voice_assistant/presentation/screens/voice_assistant_screen.dart';
+import 'package:ehealth/features/voice_assistant/presentation/screens/voice_commands_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -163,6 +164,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.voiceAssistant,
         name: RouteNames.voiceAssistant,
         builder: (context, state) => const VoiceAssistantScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.voiceCommands,
+        name: RouteNames.voiceCommands,
+        builder: (context, state) => const VoiceCommandsScreen(),
       ),
       GoRoute(
         path: RoutePaths.appointmentBooking,

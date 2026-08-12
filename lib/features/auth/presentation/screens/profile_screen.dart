@@ -58,6 +58,11 @@ class ProfileScreen extends ConsumerWidget {
             title: 'Health Progress',
             onTap: () => context.pushNamed(RouteNames.healthProgress),
           ),
+          _ProfileAction(
+            icon: Icons.record_voice_over,
+            title: 'Voice Commands',
+            onTap: () => context.pushNamed(RouteNames.voiceCommands),
+          ),
           const SizedBox(height: AppSpacing.sm),
           FilledButton.tonalIcon(
             onPressed: () async {

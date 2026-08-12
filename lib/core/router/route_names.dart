@@ -11,6 +11,7 @@ abstract final class RouteNames {
   static const doctorList = 'doctorList';
   static const videoCall = 'videoCall';
   static const voiceAssistant = 'voiceAssistant';
+  static const voiceCommands = 'voiceCommands';
   static const appointmentList = 'appointmentList';
   static const appointmentBooking = 'appointmentBooking';
   static const prescriptionList = 'prescriptionList';
@@ -35,6 +36,7 @@ abstract final class RoutePaths {
   static const doctorList = '/doctors';
   static const videoCall = '/call/:consultationId';
   static const voiceAssistant = '/voice';
+  static const voiceCommands = '/voice-commands';
   static const appointmentList = '/appointments';
   static const appointmentBooking = '/appointments/book/:doctorId';
   static const prescriptionList = '/appointments/:consultationId/prescriptions';
