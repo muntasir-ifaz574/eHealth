@@ -31,7 +31,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final success = await ref.read(authControllerProvider.notifier).login(
+    final success = await ref
+        .read(authControllerProvider.notifier)
+        .login(
           userEmail: _emailController.text.trim(),
           userPassword: _passwordController.text,
         );
@@ -67,9 +69,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         height: 48,
                         decoration: BoxDecoration(
                           color: AppColors.primaryContainer,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusButton,
+                          ),
                         ),
-                        child: const Icon(Icons.medical_services, color: Colors.white, size: 28),
+                        child: const Icon(
+                          Icons.medical_services,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -82,7 +90,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       'Log in to ${AppConstants.appName} to continue.',
                       textAlign: TextAlign.center,
-                      style: AppTextStyles.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                      style: AppTextStyles.bodyMd.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     TextFormField(
@@ -94,7 +104,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         prefixIcon: Icon(Icons.mail_outline),
                       ),
                       validator: (value) =>
-                          (value == null || !value.contains('@')) ? 'Enter a valid email' : null,
+                          (value == null || !value.contains('@'))
+                          ? 'Enter a valid email'
+                          : null,
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextFormField(
@@ -105,14 +117,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         hintText: '••••••••',
                         prefixIcon: Icon(Icons.lock_outline),
                       ),
-                      validator: (value) =>
-                          (value == null || value.length < 4) ? 'At least 4 characters' : null,
+                      validator: (value) => (value == null || value.length < 4)
+                          ? 'At least 4 characters'
+                          : null,
                     ),
                     if (authState.errorMessage != null) ...[
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         authState.errorMessage!,
-                        style: AppTextStyles.bodySm.copyWith(color: AppColors.error),
+                        style: AppTextStyles.bodySm.copyWith(
+                          color: AppColors.error,
+                        ),
                       ),
                     ],
                     const SizedBox(height: AppSpacing.md),
@@ -133,26 +148,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 Icon(Icons.arrow_forward, size: 20),
                               ],
                             ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                          child: Text('or', style: AppTextStyles.bodySm),
-                        ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Tooltip(
-                      message: 'Coming soon',
-                      child: OutlinedButton.icon(
-                        onPressed: null,
-                        icon: const Icon(Icons.login),
-                        label: const Text('Continue with Google'),
-                      ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextButton(
