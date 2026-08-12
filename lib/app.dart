@@ -8,7 +8,7 @@ import 'package:ehealth/features/video_call/presentation/providers/video_call_pr
 import 'package:ehealth/features/voice_assistant/domain/entities/voice_intent.dart';
 import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_controller.dart';
 import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_state.dart';
-import 'package:ehealth/features/voice_assistant/presentation/widgets/voice_mic_button.dart';
+import 'package:ehealth/features/voice_assistant/presentation/widgets/draggable_mic_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,11 +39,7 @@ class App extends ConsumerWidget {
               builder: (context) => Stack(
                 children: [
                   child ?? const SizedBox.shrink(),
-                  const Positioned(
-                    right: 16,
-                    bottom: 88,
-                    child: VoiceMicButton(),
-                  ),
+                  const DraggableMicButton(),
                 ],
               ),
             ),

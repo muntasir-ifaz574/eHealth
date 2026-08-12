@@ -11,14 +11,16 @@ class PrescriptionModel extends Prescription {
   });
 
   factory PrescriptionModel.fromJson(Map<String, dynamic> json) {
-    final dateInfo = json['dateInfo'] as Map<String, dynamic>;
+    final dateInfo = json['dateInfo'] as Map<String, dynamic>?;
+    final createdAtRaw = dateInfo?['createdAt'] as String?;
+    final updatedAtRaw = dateInfo?['updatedAt'] as String?;
     return PrescriptionModel(
       prescriptionId: json['prescriptionId'] as int,
       consultationId: json['consultationId'] as int,
       fileRef: json['fileRef'] as String,
       fileName: json['fileName'] as String,
-      createdAt: DateTime.parse(dateInfo['createdAt'] as String),
-      updatedAt: DateTime.parse(dateInfo['updatedAt'] as String),
+      createdAt: createdAtRaw != null ? DateTime.tryParse(createdAtRaw) : null,
+      updatedAt: updatedAtRaw != null ? DateTime.tryParse(updatedAtRaw) : null,
     );
   }
 }

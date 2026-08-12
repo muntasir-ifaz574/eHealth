@@ -70,7 +70,12 @@ abstract final class AppTheme {
           backgroundColor: AppColors.electricBlue,
           foregroundColor: AppColors.onPrimary,
           textStyle: AppTextStyles.button,
-          minimumSize: const Size.fromHeight(52),
+          // A finite minimum, not Size.fromHeight (== infinite width) — that
+          // forced every button to demand unbounded width by default, which
+          // crashes any button placed directly in a Row/other unconstrained
+          // parent. Screens that want a full-width CTA already wrap it in
+          // their own SizedBox(width: double.infinity, ...) explicitly.
+          minimumSize: const Size(64, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
           ),
@@ -81,7 +86,12 @@ abstract final class AppTheme {
           foregroundColor: AppColors.charcoalDeep,
           side: const BorderSide(color: AppColors.charcoalDeep, width: 1.5),
           textStyle: AppTextStyles.button,
-          minimumSize: const Size.fromHeight(52),
+          // A finite minimum, not Size.fromHeight (== infinite width) — that
+          // forced every button to demand unbounded width by default, which
+          // crashes any button placed directly in a Row/other unconstrained
+          // parent. Screens that want a full-width CTA already wrap it in
+          // their own SizedBox(width: double.infinity, ...) explicitly.
+          minimumSize: const Size(64, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
           ),

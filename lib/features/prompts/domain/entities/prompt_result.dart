@@ -12,21 +12,24 @@ class FirstAid extends Equatable {
   List<Object?> get props => [code, title, steps];
 }
 
-/// The response to `POST prompt/create-backup` — a triaged first-aid result
-/// for the symptom text the user just submitted.
+/// The response to `POST prompt/create-backup`. For symptom-like input this
+/// carries a full triage/first-aid assessment; for casual/non-symptom input
+/// (e.g. "Hi") the backend instead returns just a plain conversational
+/// [message] with no triage data at all — every field but [message] is
+/// therefore optional.
 class PromptResult extends Equatable {
   const PromptResult({
-    required this.generatedBy,
-    required this.triageLevel,
-    required this.firstAid,
-    required this.hospitalLookupNeeded,
+    this.generatedBy,
+    this.triageLevel,
+    this.firstAid,
+    this.hospitalLookupNeeded,
     this.message,
   });
 
-  final String generatedBy;
-  final TriageLevel triageLevel;
-  final FirstAid firstAid;
-  final bool hospitalLookupNeeded;
+  final String? generatedBy;
+  final TriageLevel? triageLevel;
+  final FirstAid? firstAid;
+  final bool? hospitalLookupNeeded;
   final String? message;
 
   @override

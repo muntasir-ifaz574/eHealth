@@ -57,6 +57,10 @@ dependencies:
   # File picking & upload (prescription verification)
   file_picker: 10.3.8
 
+  # Prescription file caching & opening
+  path_provider: ^2.1.5
+  open_filex: ^4.5.0
+
   # Charts (health progress)
   fl_chart: ^0.69.2
 

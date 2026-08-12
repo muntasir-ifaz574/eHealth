@@ -54,7 +54,9 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
     result.fold(
       (failure) => setState(() => _isLoadingOlder = false),
       (page) => setState(() {
-        _history.addAll(page.items);
+        // Older pages get prepended so the thread stays oldest-first
+        // top-to-bottom even as more history loads in above.
+        _history.insertAll(0, page.items);
         _nextCursor = page.nextCursor;
         _isLoadingOlder = false;
       }),
@@ -102,7 +104,10 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final orderedHistory = _history.reversed.toList();
+    // The API already returns items oldest-first, so no reversal is needed
+    // — reversing here put the newest message at the top instead of the
+    // bottom of the thread.
+    final orderedHistory = _history;
 
     return Scaffold(
       appBar: AppBar(title: const Text('AI Care')),
@@ -345,13 +350,16 @@ class _ResultAiBubble extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _TriageChip(level: result.triageLevel),
-              const SizedBox(height: AppSpacing.xs),
+              if (result.triageLevel != null) ...[
+                _TriageChip(level: result.triageLevel!),
+                const SizedBox(height: AppSpacing.xs),
+              ],
               if (result.message != null) ...[
                 Text(result.message!, style: AppTextStyles.bodyMd),
                 const SizedBox(height: AppSpacing.xs),
               ],
-              _FirstAidCard(firstAid: result.firstAid, isHigh: isHigh),
+              if (result.firstAid != null)
+                _FirstAidCard(firstAid: result.firstAid!, isHigh: isHigh),
               if (isHigh) ...[
                 const SizedBox(height: AppSpacing.xs),
                 SizedBox(
@@ -364,7 +372,7 @@ class _ResultAiBubble extends StatelessWidget {
                   ),
                 ),
               ],
-              if (result.hospitalLookupNeeded) ...[
+              if (result.hospitalLookupNeeded ?? false) ...[
                 const SizedBox(height: AppSpacing.xs),
                 SizedBox(
                   width: double.infinity,
@@ -417,7 +425,11 @@ class _FirstAidCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  firstAid.title,
+                  // The backend sometimes sends `firstAid` as a plain
+                  // string with no title — fall back to a generic heading.
+                  firstAid.title.isNotEmpty
+                      ? firstAid.title
+                      : (isHigh ? 'Immediate Actions' : 'Recommended First Aid'),
                   style: AppTextStyles.bodyMd.copyWith(
                     fontWeight: FontWeight.w600,
                     color: isHigh ? AppColors.onErrorContainer : AppColors.onSurface,

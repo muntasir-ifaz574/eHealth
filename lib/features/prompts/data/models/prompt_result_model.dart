@@ -4,12 +4,20 @@ import 'package:ehealth/features/prompts/domain/entities/triage_level.dart';
 class FirstAidModel extends FirstAid {
   const FirstAidModel({required super.code, required super.title, required super.steps});
 
-  factory FirstAidModel.fromJson(Map<String, dynamic> json) {
-    final description = json['description'] as Map<String, dynamic>;
+  /// The backend has been observed sending `firstAid` as either the
+  /// documented structured object (`{code, description: {title, steps}}`)
+  /// or, for some triage responses, a plain sentence string — handle both.
+  factory FirstAidModel.fromDynamic(dynamic value) {
+    if (value is String) {
+      return FirstAidModel(code: '', title: '', steps: [value]);
+    }
+
+    final json = value as Map<String, dynamic>;
+    final description = json['description'] as Map<String, dynamic>?;
     return FirstAidModel(
-      code: json['code'] as String,
-      title: description['title'] as String,
-      steps: (description['steps'] as List<dynamic>).cast<String>(),
+      code: json['code'] as String? ?? '',
+      title: description?['title'] as String? ?? '',
+      steps: (description?['steps'] as List<dynamic>?)?.cast<String>() ?? const [],
     );
   }
 }
@@ -24,11 +32,12 @@ class PromptResultModel extends PromptResult {
   });
 
   factory PromptResultModel.fromJson(Map<String, dynamic> json) {
+    final firstAidJson = json['firstAid'];
     return PromptResultModel(
-      generatedBy: json['generatedBy'] as String,
-      triageLevel: TriageLevel.fromJson(json['triageLevel'] as String?) ?? TriageLevel.low,
-      firstAid: FirstAidModel.fromJson(json['firstAid'] as Map<String, dynamic>),
-      hospitalLookupNeeded: json['hospitalLookupNeeded'] as bool? ?? false,
+      generatedBy: json['generatedBy'] as String?,
+      triageLevel: TriageLevel.fromJson(json['triageLevel'] as String?),
+      firstAid: firstAidJson != null ? FirstAidModel.fromDynamic(firstAidJson) : null,
+      hospitalLookupNeeded: json['hospitalLookupNeeded'] as bool?,
       message: json['message'] as String?,
     );
   }
