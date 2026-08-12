@@ -1,5 +1,6 @@
 import 'package:ehealth/core/constants/api_constants.dart';
 import 'package:ehealth/core/router/route_names.dart';
+import 'package:ehealth/core/usecase/usecase.dart';
 import 'package:ehealth/core/theme/app_colors.dart';
 import 'package:ehealth/core/theme/app_spacing.dart';
 import 'package:ehealth/core/theme/app_text_styles.dart';
@@ -12,7 +13,9 @@ import 'package:ehealth/features/prompts/domain/entities/prompt_result.dart';
 import 'package:ehealth/features/prompts/domain/entities/triage_level.dart';
 import 'package:ehealth/features/prompts/domain/usecases/get_prompts.dart';
 import 'package:ehealth/features/prompts/presentation/providers/prompts_providers.dart';
+import 'package:ehealth/features/voice_assistant/domain/entities/voice_recognition_result.dart';
 import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_controller.dart';
+import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,6 +33,7 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
   final _scrollController = ScrollController();
 
   bool _isSubmitting = false;
+  bool _isListening = false;
   final List<_Turn> _turns = [];
 
   final List<Prompt> _history = [];
@@ -44,9 +48,57 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
 
   @override
   void dispose() {
+    if (_isListening) ref.read(stopListeningProvider).call(const NoParams());
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleVoiceInput() async {
+    if (_isListening) {
+      await ref.read(stopListeningProvider).call(const NoParams());
+      if (mounted) setState(() => _isListening = false);
+      return;
+    }
+
+    final initResult = await ref
+        .read(initializeVoiceEngineProvider)
+        .call(const NoParams());
+    final available = initResult.fold((_) => false, (ok) => ok);
+    if (!mounted) return;
+    if (!available) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Voice input is unavailable. Check microphone permission.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final startResult = await ref
+        .read(startListeningProvider)
+        .call(_onVoiceResult);
+    if (!mounted) return;
+    startResult.fold(
+      (failure) => ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message))),
+      (_) => setState(() => _isListening = true),
+    );
+  }
+
+  void _onVoiceResult(VoiceRecognitionResult result) {
+    if (!mounted) return;
+    _textController.value = TextEditingValue(
+      text: result.text,
+      selection: TextSelection.collapsed(offset: result.text.length),
+    );
+    if (!result.isFinal || result.text.trim().isEmpty) return;
+
+    setState(() => _isListening = false);
+    _submit();
   }
 
   Future<void> _loadOlder({String? afterCursor}) async {
@@ -58,8 +110,6 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
     result.fold(
       (failure) => setState(() => _isLoadingOlder = false),
       (page) => setState(() {
-        // Older pages get prepended so the thread stays oldest-first
-        // top-to-bottom even as more history loads in above.
         _history.insertAll(0, page.items);
         _nextCursor = page.nextCursor;
         _isLoadingOlder = false;
@@ -125,9 +175,6 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // The API already returns items oldest-first, so no reversal is needed
-    // — reversing here put the newest message at the top instead of the
-    // bottom of the thread.
     final orderedHistory = _history;
 
     return Scaffold(
@@ -160,7 +207,9 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
           _Composer(
             controller: _textController,
             isSubmitting: _isSubmitting,
+            isListening: _isListening,
             onSend: _submit,
+            onToggleVoice: _toggleVoiceInput,
           ),
         ],
       ),
@@ -188,7 +237,10 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
       widgets.add(
         Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
-          child: Text(error, style: AppTextStyles.bodySm.copyWith(color: AppColors.error)),
+          child: Text(
+            error,
+            style: AppTextStyles.bodySm.copyWith(color: AppColors.error),
+          ),
         ),
       );
     } else if (_isSubmitting && turn == _turns.last) {
@@ -198,8 +250,6 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
   }
 }
 
-/// One submitted message this session and its eventual outcome — either a
-/// [result], an [error], or (while `_isSubmitting`) still in flight.
 class _Turn {
   _Turn(this.userText);
 
@@ -212,12 +262,16 @@ class _Composer extends StatelessWidget {
   const _Composer({
     required this.controller,
     required this.isSubmitting,
+    required this.isListening,
     required this.onSend,
+    required this.onToggleVoice,
   });
 
   final TextEditingController controller;
   final bool isSubmitting;
+  final bool isListening;
   final VoidCallback onSend;
+  final VoidCallback onToggleVoice;
 
   @override
   Widget build(BuildContext context) {
@@ -236,6 +290,29 @@ class _Composer extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.xs),
+              child: Material(
+                color: isListening
+                    ? AppColors.error
+                    : AppColors.surfaceContainerLow,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  onTap: isSubmitting ? null : onToggleVoice,
+                  customBorder: const CircleBorder(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(
+                      isListening ? Icons.mic : Icons.mic_none,
+                      size: 20,
+                      color: isListening
+                          ? Colors.white
+                          : AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -252,7 +329,9 @@ class _Composer extends StatelessWidget {
                   textInputAction: TextInputAction.newline,
                   style: AppTextStyles.bodyMd,
                   decoration: InputDecoration(
-                    hintText: 'Describe your symptoms...',
+                    hintText: isListening
+                        ? 'Listening…'
+                        : 'Describe your symptoms...',
                     hintStyle: AppTextStyles.bodyMd.copyWith(
                       color: AppColors.onSurfaceVariant,
                     ),
