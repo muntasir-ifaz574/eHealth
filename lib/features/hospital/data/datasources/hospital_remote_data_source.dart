@@ -75,8 +75,9 @@ class HospitalRemoteDataSourceImpl implements HospitalRemoteDataSource {
       }
 
       final result = response.data?['result'] as Map<String, dynamic>?;
-      if (result == null)
+      if (result == null) {
         throw const ServerException('Hospital details not found.');
+      }
 
       return HospitalModel.fromDetailsJson(result);
     } on DioException catch (e) {

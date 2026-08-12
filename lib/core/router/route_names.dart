@@ -3,6 +3,7 @@ abstract final class RouteNames {
   static const home = 'home';
   static const login = 'login';
   static const register = 'register';
+  static const welcome = 'welcome';
   static const profile = 'profile';
   static const hospitalList = 'hospitalList';
   static const hospitalMap = 'hospitalMap';
@@ -16,6 +17,7 @@ abstract final class RouteNames {
   static const prescriptionVerify = 'prescriptionVerify';
   static const symptomChecker = 'symptomChecker';
   static const healthProgress = 'healthProgress';
+  static const paymentReview = 'paymentReview';
   static const paymentCheckout = 'paymentCheckout';
   static const paymentResult = 'paymentResult';
 }
@@ -25,6 +27,7 @@ abstract final class RoutePaths {
   static const home = '/home';
   static const login = '/login';
   static const register = '/register';
+  static const welcome = '/welcome';
   static const profile = '/profile';
   static const hospitalList = '/hospitals';
   static const hospitalMap = '/hospitals/map';
@@ -38,6 +41,7 @@ abstract final class RoutePaths {
   static const prescriptionVerify = '/prescriptions/:prescriptionId/verify';
   static const symptomChecker = '/symptom-checker';
   static const healthProgress = '/health-progress';
+  static const paymentReview = '/payments/:consultationId/review';
   static const paymentCheckout = '/payments/:consultationId/checkout';
   static const paymentResult = '/payments/result';
 

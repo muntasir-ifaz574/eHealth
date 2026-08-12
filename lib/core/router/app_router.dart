@@ -1,4 +1,5 @@
 import 'package:ehealth/core/router/route_names.dart';
+import 'package:ehealth/core/widgets/app_shell.dart';
 import 'package:ehealth/features/appointments/presentation/screens/appointment_booking_screen.dart';
 import 'package:ehealth/features/appointments/presentation/screens/my_appointments_screen.dart';
 import 'package:ehealth/features/auth/presentation/providers/auth_providers.dart';
@@ -6,11 +7,13 @@ import 'package:ehealth/features/auth/presentation/providers/auth_state.dart';
 import 'package:ehealth/features/auth/presentation/screens/login_screen.dart';
 import 'package:ehealth/features/auth/presentation/screens/profile_screen.dart';
 import 'package:ehealth/features/auth/presentation/screens/register_screen.dart';
+import 'package:ehealth/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:ehealth/features/home/presentation/screens/home_screen.dart';
 import 'package:ehealth/features/hospital/presentation/screens/hospital_detail_screen.dart';
 import 'package:ehealth/features/hospital/presentation/screens/hospital_list_screen.dart';
 import 'package:ehealth/features/hospital/presentation/screens/hospital_map_screen.dart';
 import 'package:ehealth/features/payments/presentation/screens/payment_result_screen.dart';
+import 'package:ehealth/features/payments/presentation/screens/payment_review_screen.dart';
 import 'package:ehealth/features/payments/presentation/screens/payment_webview_screen.dart';
 import 'package:ehealth/features/prescriptions/presentation/screens/prescription_list_screen.dart';
 import 'package:ehealth/features/prescriptions/presentation/screens/prescription_verify_screen.dart';
@@ -77,14 +80,53 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
-        path: RoutePaths.profile,
-        name: RouteNames.profile,
-        builder: (context, state) => const ProfileScreen(),
+        path: RoutePaths.welcome,
+        name: RouteNames.welcome,
+        builder: (context, state) => const WelcomeScreen(),
       ),
-      GoRoute(
-        path: RoutePaths.home,
-        name: RouteNames.home,
-        builder: (context, state) => const HomeScreen(),
+      // The four bottom-nav tabs live in one persistent shell — built once by
+      // AppShell and kept alive across tab switches, so the nav bar itself
+      // never rebuilds when tapping between Home/Appointment/AI/Profile.
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.home,
+                name: RouteNames.home,
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.appointmentList,
+                name: RouteNames.appointmentList,
+                builder: (context, state) => const MyAppointmentsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.symptomChecker,
+                name: RouteNames.symptomChecker,
+                builder: (context, state) => const SymptomCheckerScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePaths.profile,
+                name: RouteNames.profile,
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
       GoRoute(
         path: RoutePaths.hospitalList,
@@ -123,11 +165,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const VoiceAssistantScreen(),
       ),
       GoRoute(
-        path: RoutePaths.appointmentList,
-        name: RouteNames.appointmentList,
-        builder: (context, state) => const MyAppointmentsScreen(),
-      ),
-      GoRoute(
         path: RoutePaths.appointmentBooking,
         name: RouteNames.appointmentBooking,
         builder: (context, state) => AppointmentBookingScreen(
@@ -149,14 +186,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: RoutePaths.symptomChecker,
-        name: RouteNames.symptomChecker,
-        builder: (context, state) => const SymptomCheckerScreen(),
-      ),
-      GoRoute(
         path: RoutePaths.healthProgress,
         name: RouteNames.healthProgress,
         builder: (context, state) => const HealthProgressScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.paymentReview,
+        name: RouteNames.paymentReview,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? const {};
+          return PaymentReviewScreen(
+            consultationId: int.parse(state.pathParameters['consultationId']!),
+            amount: extra['amount'] as num,
+            userId: extra['userId'] as int,
+          );
+        },
       ),
       GoRoute(
         path: RoutePaths.paymentCheckout,

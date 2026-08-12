@@ -1,4 +1,8 @@
 import 'package:ehealth/core/router/route_names.dart';
+import 'package:ehealth/core/theme/app_colors.dart';
+import 'package:ehealth/core/theme/app_spacing.dart';
+import 'package:ehealth/core/theme/app_text_styles.dart';
+import 'package:ehealth/core/widgets/app_card.dart';
 import 'package:ehealth/features/auth/presentation/providers/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,16 +18,31 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('My Profile')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.marginMobile),
         children: [
-          Card(
-            child: ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.person)),
-              title: Text(user?.userName ?? ''),
-              subtitle: Text(user?.userEmail ?? ''),
+          AppCard(
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: AppColors.electricBlue.withValues(alpha: 0.1),
+                  child: const Icon(Icons.person, color: AppColors.electricBlue),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(user?.userName ?? '', style: AppTextStyles.headlineMd),
+                      const SizedBox(height: 2),
+                      Text(user?.userEmail ?? '', style: AppTextStyles.bodySm),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.sm),
           _ProfileAction(
             icon: Icons.event_note,
             title: 'My Appointments',
@@ -39,7 +58,7 @@ class ProfileScreen extends ConsumerWidget {
             title: 'Health Progress',
             onTap: () => context.pushNamed(RouteNames.healthProgress),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.sm),
           FilledButton.tonalIcon(
             onPressed: () async {
               await ref.read(authControllerProvider.notifier).logout();
@@ -63,13 +82,28 @@ class _ProfileAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Icon(icon),
-        title: Text(title),
-        trailing: const Icon(Icons.chevron_right),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: AppCard(
         onTap: onTap,
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.electricBlue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+              ),
+              child: Icon(icon, color: AppColors.electricBlue, size: 20),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(title, style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.w600)),
+            ),
+            Icon(Icons.chevron_right, color: AppColors.outline),
+          ],
+        ),
       ),
     );
   }

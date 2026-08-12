@@ -1,5 +1,7 @@
 import 'package:ehealth/core/constants/api_constants.dart';
 import 'package:ehealth/core/router/route_names.dart';
+import 'package:ehealth/core/theme/app_colors.dart';
+import 'package:ehealth/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,16 +23,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.health_and_safety, size: 72),
-            SizedBox(height: 16),
-            Text(AppConstants.appName, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            SizedBox(height: 24),
-            CircularProgressIndicator(),
+            const Icon(Icons.health_and_safety, size: 72, color: AppColors.electricBlue),
+            const SizedBox(height: 16),
+            Text(AppConstants.appName, style: AppTextStyles.headlineLg),
+            const SizedBox(height: 24),
+            const CircularProgressIndicator(color: AppColors.electricBlue),
           ],
         ),
       ),

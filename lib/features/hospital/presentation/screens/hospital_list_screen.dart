@@ -1,7 +1,8 @@
 import 'package:ehealth/core/constants/api_constants.dart';
 import 'package:ehealth/core/router/route_names.dart';
+import 'package:ehealth/core/theme/app_colors.dart';
+import 'package:ehealth/core/theme/app_text_styles.dart';
 import 'package:ehealth/core/utils/dialer.dart';
-import 'package:ehealth/core/widgets/app_scaffold.dart';
 import 'package:ehealth/core/widgets/async_value_widget.dart';
 import 'package:ehealth/features/hospital/presentation/providers/hospital_providers.dart';
 import 'package:ehealth/features/hospital/presentation/widgets/hospital_card.dart';
@@ -16,8 +17,7 @@ class HospitalListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final hospitalsAsync = ref.watch(nearbyHospitalsProvider);
 
-    return AppScaffold(
-      currentTab: AppTab.hospitals,
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Nearby Hospitals'),
         actions: [
@@ -35,7 +35,9 @@ class HospitalListScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(nearbyHospitalsProvider),
           data: (hospitals) {
             if (hospitals.isEmpty) {
-              return const Center(child: Text('No hospitals found nearby.'));
+              return Center(
+                child: Text('No hospitals found nearby.', style: AppTextStyles.bodyMd),
+              );
             }
             return ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -56,9 +58,9 @@ class HospitalListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => dialPhoneNumber(AppConstants.emergencyServiceNumber),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.error,
         icon: const Icon(Icons.emergency, color: Colors.white),
-        label: const Text('Emergency', style: TextStyle(color: Colors.white)),
+        label: Text('Emergency', style: AppTextStyles.button.copyWith(color: Colors.white)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );

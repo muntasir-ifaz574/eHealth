@@ -1,3 +1,4 @@
+import 'package:ehealth/core/theme/app_colors.dart';
 import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_controller.dart';
 import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_state.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,8 @@ class VoiceMicButton extends ConsumerWidget {
 
     return FloatingActionButton(
       heroTag: 'voiceMicButton',
-      backgroundColor: isListening ? Colors.redAccent : null,
+      backgroundColor: isListening ? AppColors.error : AppColors.electricBlue,
+      foregroundColor: Colors.white,
       onPressed: isBusy
           ? null
           : () => ref.read(voiceAssistantControllerProvider.notifier).toggleListening(),

@@ -1,3 +1,6 @@
+import 'package:ehealth/core/theme/app_colors.dart';
+import 'package:ehealth/core/theme/app_spacing.dart';
+import 'package:ehealth/core/theme/app_text_styles.dart';
 import 'package:ehealth/core/utils/dialer.dart';
 import 'package:ehealth/core/widgets/async_value_widget.dart';
 import 'package:ehealth/features/hospital/presentation/providers/hospital_providers.dart';
@@ -33,30 +36,30 @@ class HospitalDetailScreen extends ConsumerWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.marginMobile),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(hospital.name, style: Theme.of(context).textTheme.headlineSmall),
-                    const SizedBox(height: 8),
+                    Text(hospital.name, style: AppTextStyles.headlineMd),
+                    const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined, size: 18),
+                        const Icon(Icons.location_on_outlined, size: 18, color: AppColors.onSurfaceVariant),
                         const SizedBox(width: 4),
-                        Expanded(child: Text(hospital.address)),
+                        Expanded(child: Text(hospital.address, style: AppTextStyles.bodyMd)),
                       ],
                     ),
                     if (hospital.rating != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.xs),
                       Row(
                         children: [
                           const Icon(Icons.star, size: 18, color: Colors.amber),
                           const SizedBox(width: 4),
-                          Text(hospital.rating!.toStringAsFixed(1)),
+                          Text(hospital.rating!.toStringAsFixed(1), style: AppTextStyles.bodyMd),
                         ],
                       ),
                     ],
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.md),
                     FilledButton.icon(
                       onPressed: hospital.phoneNumber == null
                           ? null

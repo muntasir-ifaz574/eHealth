@@ -1,4 +1,5 @@
 import 'package:ehealth/core/di/core_providers.dart';
+import 'package:ehealth/core/theme/app_colors.dart';
 import 'package:ehealth/core/widgets/async_value_widget.dart';
 import 'package:ehealth/features/video_call/presentation/providers/video_call_providers.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class VideoCallScreen extends ConsumerWidget {
     final credentialsAsync = ref.watch(conferenceCredentialsProvider(consultationId));
 
     return Scaffold(
+      backgroundColor: AppColors.charcoalDeep,
       body: AsyncValueWidget(
         value: credentialsAsync,
         onRetry: () => ref.invalidate(conferenceCredentialsProvider(consultationId)),
@@ -37,13 +39,21 @@ class VideoCallScreen extends ConsumerWidget {
                 );
               }
 
+              final config = ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
+                ..background = Container(color: AppColors.charcoalDeep)
+                ..bottomMenuBar.backgroundColor = AppColors.charcoalDeep.withValues(alpha: 0.55)
+                // The Android activity doesn't declare PiP support
+                // (android:supportsPictureInPicture), so backgrounding would
+                // otherwise repeatedly throw setPictureInPictureParams errors.
+                ..pip.enableWhenBackground = false;
+
               return ZegoUIKitPrebuiltCall(
                 appID: credentials.appId,
                 appSign: credentials.serverSecret,
                 userID: credentials.userId.toString(),
                 userName: credentials.userName,
                 callID: credentials.consultationId,
-                config: ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall(),
+                config: config,
                 events: ZegoUIKitPrebuiltCallEvents(
                   onCallEnd: (event, defaultAction) => Navigator.of(context).maybePop(),
                 ),

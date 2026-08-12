@@ -1,3 +1,6 @@
+import 'package:ehealth/core/theme/app_colors.dart';
+import 'package:ehealth/core/theme/app_spacing.dart';
+import 'package:ehealth/core/theme/app_text_styles.dart';
 import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_controller.dart';
 import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_state.dart';
 import 'package:ehealth/features/voice_assistant/presentation/widgets/voice_mic_button.dart';
@@ -14,44 +17,44 @@ class VoiceAssistantScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Voice Assistant')),
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
-            Text(_statusLabel(state.status), style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 24),
+            Text(_statusLabel(state.status), style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: AppSpacing.md),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('You said', style: Theme.of(context).textTheme.labelLarge),
+                    Text('YOU SAID', style: AppTextStyles.labelCaps),
                     const SizedBox(height: 4),
                     Text(
                       state.transcript.isEmpty ? '—' : state.transcript,
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      style: AppTextStyles.headlineMd,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.md),
                     if (state.lastResponse != null) ...[
-                      Text('Assistant', style: Theme.of(context).textTheme.labelLarge),
+                      Text('ASSISTANT', style: AppTextStyles.labelCaps),
                       const SizedBox(height: 4),
-                      Text(state.lastResponse!),
+                      Text(state.lastResponse!, style: AppTextStyles.bodyMd),
                     ],
                     if (state.errorMessage != null) ...[
-                      const SizedBox(height: 24),
-                      Text(state.errorMessage!, style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(state.errorMessage!, style: AppTextStyles.bodyMd.copyWith(color: AppColors.error)),
                     ],
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
                       'Try saying: "find hospital", "show map", '
                       '"call doctor <name>", "talk to doctor", "emergency", '
                       '"go home".',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: AppTextStyles.bodySm,
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.sm),
             const VoiceMicButton(),
           ],
         ),

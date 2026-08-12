@@ -63,6 +63,9 @@ dependencies:
   # In-app payment checkout
   webview_flutter: ^4.10.0
 
+  # Design system fonts (Hanken Grotesk / Inter / JetBrains Mono)
+  google_fonts: ^6.2.1
+
   # DI helpers
   get_it: ^8.0.2
 

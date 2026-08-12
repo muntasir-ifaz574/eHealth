@@ -67,11 +67,11 @@ class App extends ConsumerWidget {
         await voice.speak('Going home.');
 
       case FindNearbyHospitalsIntent():
-        router.goNamed(RouteNames.hospitalList);
+        router.pushNamed(RouteNames.hospitalList);
         await voice.speak('Showing hospitals near you.');
 
       case ShowHospitalsOnMapIntent():
-        router.goNamed(RouteNames.hospitalMap);
+        router.pushNamed(RouteNames.hospitalMap);
         await voice.speak('Here is the hospital map.');
 
       case CallEmergencyIntent():
@@ -79,7 +79,7 @@ class App extends ConsumerWidget {
         await dialPhoneNumber(AppConstants.emergencyServiceNumber);
 
       case OpenDoctorListIntent():
-        router.goNamed(RouteNames.doctorList);
+        router.pushNamed(RouteNames.doctorList);
         await voice.speak('Here are the available doctors.');
 
       case StartVideoCallIntent(:final doctorName):
