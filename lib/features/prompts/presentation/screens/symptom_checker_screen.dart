@@ -3,13 +3,16 @@ import 'package:ehealth/core/router/route_names.dart';
 import 'package:ehealth/core/theme/app_colors.dart';
 import 'package:ehealth/core/theme/app_spacing.dart';
 import 'package:ehealth/core/theme/app_text_styles.dart';
+import 'package:collection/collection.dart';
 import 'package:ehealth/core/utils/dialer.dart';
 import 'package:ehealth/core/widgets/pill_chip.dart';
+import 'package:ehealth/features/hospital/presentation/providers/hospital_providers.dart';
 import 'package:ehealth/features/prompts/domain/entities/prompt.dart';
 import 'package:ehealth/features/prompts/domain/entities/prompt_result.dart';
 import 'package:ehealth/features/prompts/domain/entities/triage_level.dart';
 import 'package:ehealth/features/prompts/domain/usecases/get_prompts.dart';
 import 'package:ehealth/features/prompts/presentation/providers/prompts_providers.dart';
+import 'package:ehealth/features/voice_assistant/presentation/providers/voice_assistant_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,7 +21,8 @@ class SymptomCheckerScreen extends ConsumerStatefulWidget {
   const SymptomCheckerScreen({super.key});
 
   @override
-  ConsumerState<SymptomCheckerScreen> createState() => _SymptomCheckerScreenState();
+  ConsumerState<SymptomCheckerScreen> createState() =>
+      _SymptomCheckerScreenState();
 }
 
 class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
@@ -26,9 +30,7 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
   final _scrollController = ScrollController();
 
   bool _isSubmitting = false;
-  String? _pendingUserText;
-  PromptResult? _pendingResult;
-  String? _errorMessage;
+  final List<_Turn> _turns = [];
 
   final List<Prompt> _history = [];
   String? _nextCursor;
@@ -49,7 +51,9 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
 
   Future<void> _loadOlder({String? afterCursor}) async {
     setState(() => _isLoadingOlder = true);
-    final result = await ref.read(getPromptsProvider).call(GetPromptsParams(afterCursor: afterCursor));
+    final result = await ref
+        .read(getPromptsProvider)
+        .call(GetPromptsParams(afterCursor: afterCursor));
     if (!mounted) return;
     result.fold(
       (failure) => setState(() => _isLoadingOlder = false),
@@ -68,11 +72,10 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
     if (text.isEmpty || _isSubmitting) return;
 
     _textController.clear();
+    final turn = _Turn(text);
     setState(() {
       _isSubmitting = true;
-      _errorMessage = null;
-      _pendingUserText = text;
-      _pendingResult = null;
+      _turns.add(turn);
     });
     _scrollToBottom();
 
@@ -81,14 +84,32 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
     result.fold(
       (failure) => setState(() {
         _isSubmitting = false;
-        _errorMessage = failure.message;
+        turn.error = failure.message;
       }),
-      (promptResult) => setState(() {
-        _isSubmitting = false;
-        _pendingResult = promptResult;
-      }),
+      (promptResult) {
+        setState(() {
+          _isSubmitting = false;
+          turn.result = promptResult;
+        });
+        if (promptResult.triageLevel == TriageLevel.high) {
+          ref
+              .read(voiceAssistantControllerProvider.notifier)
+              .speak(_spokenTextFor(promptResult));
+        }
+      },
     );
     _scrollToBottom();
+  }
+
+  /// What gets read aloud for a HIGH-priority result — the actionable
+  /// first-aid guidance itself, not the triage label.
+  String _spokenTextFor(PromptResult result) {
+    final firstAid = result.firstAid;
+    if (firstAid != null && firstAid.steps.isNotEmpty) {
+      return 'High priority. ${firstAid.steps.join('. ')}';
+    }
+    if (result.message != null) return 'High priority. ${result.message}';
+    return 'High priority. Please seek medical attention immediately.';
   }
 
   void _scrollToBottom() {
@@ -130,17 +151,17 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
                     padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
                     child: Center(child: CircularProgressIndicator()),
                   ),
-                for (final prompt in orderedHistory) ..._buildHistoryTurn(prompt),
-                if (_pendingUserText != null) ..._buildPendingTurn(),
-                if (_errorMessage != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    child: Text(_errorMessage!, style: AppTextStyles.bodySm.copyWith(color: AppColors.error)),
-                  ),
+                for (final prompt in orderedHistory)
+                  ..._buildHistoryTurn(prompt),
+                for (final turn in _turns) ..._buildTurn(turn),
               ],
             ),
           ),
-          _Composer(controller: _textController, isSubmitting: _isSubmitting, onSend: _submit),
+          _Composer(
+            controller: _textController,
+            isSubmitting: _isSubmitting,
+            onSend: _submit,
+          ),
         ],
       ),
     );
@@ -157,20 +178,42 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
     return widgets;
   }
 
-  List<Widget> _buildPendingTurn() {
-    final widgets = <Widget>[_UserBubble(text: _pendingUserText!, createdAt: null)];
-    final result = _pendingResult;
+  List<Widget> _buildTurn(_Turn turn) {
+    final widgets = <Widget>[_UserBubble(text: turn.userText, createdAt: null)];
+    final result = turn.result;
+    final error = turn.error;
     if (result != null) {
       widgets.add(_ResultAiBubble(result: result));
-    } else if (_isSubmitting) {
+    } else if (error != null) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: Text(error, style: AppTextStyles.bodySm.copyWith(color: AppColors.error)),
+        ),
+      );
+    } else if (_isSubmitting && turn == _turns.last) {
       widgets.add(const _TypingBubble());
     }
     return widgets;
   }
 }
 
+/// One submitted message this session and its eventual outcome — either a
+/// [result], an [error], or (while `_isSubmitting`) still in flight.
+class _Turn {
+  _Turn(this.userText);
+
+  final String userText;
+  PromptResult? result;
+  String? error;
+}
+
 class _Composer extends StatelessWidget {
-  const _Composer({required this.controller, required this.isSubmitting, required this.onSend});
+  const _Composer({
+    required this.controller,
+    required this.isSubmitting,
+    required this.onSend,
+  });
 
   final TextEditingController controller;
   final bool isSubmitting;
@@ -182,7 +225,11 @@ class _Composer extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.marginMobile),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.outlineVariant.withValues(alpha: 0.2))),
+        border: Border(
+          top: BorderSide(
+            color: AppColors.outlineVariant.withValues(alpha: 0.2),
+          ),
+        ),
       ),
       child: SafeArea(
         top: false,
@@ -194,7 +241,9 @@ class _Composer extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-                  border: Border.all(color: AppColors.outlineVariant.withValues(alpha: 0.5)),
+                  border: Border.all(
+                    color: AppColors.outlineVariant.withValues(alpha: 0.5),
+                  ),
                 ),
                 child: TextField(
                   controller: controller,
@@ -204,20 +253,31 @@ class _Composer extends StatelessWidget {
                   style: AppTextStyles.bodyMd,
                   decoration: InputDecoration(
                     hintText: 'Describe your symptoms...',
-                    hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                    hintStyle: AppTextStyles.bodyMd.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     suffixIcon: Padding(
                       padding: const EdgeInsets.all(6),
                       child: Material(
-                        color: isSubmitting ? AppColors.outlineVariant : AppColors.electricBlue,
+                        color: isSubmitting
+                            ? AppColors.outlineVariant
+                            : AppColors.electricBlue,
                         borderRadius: BorderRadius.circular(8),
                         child: InkWell(
                           onTap: isSubmitting ? null : onSend,
                           borderRadius: BorderRadius.circular(8),
                           child: const Padding(
                             padding: EdgeInsets.all(8),
-                            child: Icon(Icons.send, size: 16, color: Colors.white),
+                            child: Icon(
+                              Icons.send,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -248,7 +308,9 @@ class _UserBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.85),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.85,
+            ),
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: const BoxDecoration(
               color: AppColors.surfaceContainerHigh,
@@ -264,7 +326,10 @@ class _UserBubble extends StatelessWidget {
           if (createdAt != null)
             Padding(
               padding: const EdgeInsets.only(top: 4, right: 4),
-              child: Text(_formatTime(createdAt!), style: AppTextStyles.labelCaps),
+              child: Text(
+                _formatTime(createdAt!),
+                style: AppTextStyles.labelCaps,
+              ),
             ),
         ],
       ),
@@ -292,7 +357,9 @@ class _HistoryAiBubble extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Container(
-          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9),
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
+          ),
           padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: const BoxDecoration(
             color: AppColors.aiBubbleTint,
@@ -311,7 +378,12 @@ class _HistoryAiBubble extends StatelessWidget {
                 _TriageChip(level: prompt.triageLevel!),
                 const SizedBox(height: AppSpacing.xs),
               ],
-              if (prompt.firstAidString != null) Text(prompt.firstAidString!, style: AppTextStyles.bodyMd),
+              if (prompt.firstAidString != null)
+                Text(prompt.firstAidString!, style: AppTextStyles.bodyMd),
+              if (prompt.triageLevel == TriageLevel.high) ...[
+                const SizedBox(height: AppSpacing.xs),
+                const _NearbyHospitalCallButton(),
+              ],
             ],
           ),
         ),
@@ -344,7 +416,9 @@ class _ResultAiBubble extends StatelessWidget {
               bottomRight: Radius.circular(16),
               bottomLeft: Radius.circular(4),
             ),
-            border: isHigh ? Border.all(color: AppColors.triageHigh.withValues(alpha: 0.2)) : null,
+            border: isHigh
+                ? Border.all(color: AppColors.triageHigh.withValues(alpha: 0.2))
+                : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,12 +439,17 @@ class _ResultAiBubble extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: () => dialPhoneNumber(AppConstants.emergencyServiceNumber),
-                    style: FilledButton.styleFrom(backgroundColor: AppColors.electricBlue),
+                    onPressed: () =>
+                        dialPhoneNumber(AppConstants.emergencyServiceNumber),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.electricBlue,
+                    ),
                     icon: const Icon(Icons.call),
                     label: const Text('Contact Emergency Services'),
                   ),
                 ),
+                const SizedBox(height: AppSpacing.xs),
+                const _NearbyHospitalCallButton(),
               ],
               if (result.hospitalLookupNeeded ?? false) ...[
                 const SizedBox(height: AppSpacing.xs),
@@ -403,7 +482,9 @@ class _FirstAidCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xs),
       decoration: BoxDecoration(
-        color: isHigh ? AppColors.errorContainer : AppColors.surfaceContainerLowest,
+        color: isHigh
+            ? AppColors.errorContainer
+            : AppColors.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
         border: Border.all(
           color: isHigh
@@ -429,10 +510,14 @@ class _FirstAidCard extends StatelessWidget {
                   // string with no title — fall back to a generic heading.
                   firstAid.title.isNotEmpty
                       ? firstAid.title
-                      : (isHigh ? 'Immediate Actions' : 'Recommended First Aid'),
+                      : (isHigh
+                            ? 'Immediate Actions'
+                            : 'Recommended First Aid'),
                   style: AppTextStyles.bodyMd.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: isHigh ? AppColors.onErrorContainer : AppColors.onSurface,
+                    color: isHigh
+                        ? AppColors.onErrorContainer
+                        : AppColors.onSurface,
                   ),
                 ),
               ),
@@ -450,14 +535,18 @@ class _FirstAidCard extends StatelessWidget {
                     child: Icon(
                       Icons.circle,
                       size: 6,
-                      color: isHigh ? AppColors.onErrorContainer : AppColors.onSurfaceVariant,
+                      color: isHigh
+                          ? AppColors.onErrorContainer
+                          : AppColors.onSurfaceVariant,
                     ),
                   ),
                   Expanded(
                     child: Text(
                       step,
                       style: AppTextStyles.bodySm.copyWith(
-                        color: isHigh ? AppColors.onErrorContainer : AppColors.onSurfaceVariant,
+                        color: isHigh
+                            ? AppColors.onErrorContainer
+                            : AppColors.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -470,6 +559,34 @@ class _FirstAidCard extends StatelessWidget {
   }
 }
 
+class _NearbyHospitalCallButton extends ConsumerWidget {
+  const _NearbyHospitalCallButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hospitalsAsync = ref.watch(nearbyHospitalsProvider);
+
+    return hospitalsAsync.maybeWhen(
+      data: (hospitals) {
+        final nearest = hospitals
+            .where((h) => h.phoneNumber != null && h.phoneNumber!.isNotEmpty)
+            .firstOrNull;
+        if (nearest == null) return const SizedBox.shrink();
+
+        return SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => dialPhoneNumber(nearest.phoneNumber!),
+            icon: const Icon(Icons.local_hospital),
+            label: Text('Call ${nearest.name}'),
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
 class _TriageChip extends StatelessWidget {
   const _TriageChip({required this.level});
 
@@ -478,9 +595,21 @@ class _TriageChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color, icon) = switch (level) {
-      TriageLevel.high => ('Priority: High', AppColors.triageHigh, Icons.emergency),
-      TriageLevel.medium => ('Priority: Medium', AppColors.triageMedium, Icons.warning),
-      TriageLevel.low => ('Priority: Low', AppColors.triageLow, Icons.info_outline),
+      TriageLevel.high => (
+        'Priority: High',
+        AppColors.triageHigh,
+        Icons.emergency,
+      ),
+      TriageLevel.medium => (
+        'Priority: Medium',
+        AppColors.triageMedium,
+        Icons.warning,
+      ),
+      TriageLevel.low => (
+        'Priority: Low',
+        AppColors.triageLow,
+        Icons.info_outline,
+      ),
     };
     return PillChip(label: label, color: color, icon: icon);
   }
@@ -496,7 +625,10 @@ class _TypingBubble extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: 14,
+          ),
           decoration: const BoxDecoration(
             color: AppColors.aiBubbleTint,
             borderRadius: BorderRadius.only(
