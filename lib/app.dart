@@ -104,6 +104,9 @@ class App extends ConsumerWidget {
     }
   }
 
+  /// There's no ad-hoc/instant call anymore — every call is tied to a
+  /// booked consultation — so a voice request to "call" a doctor starts
+  /// that doctor's booking flow instead of joining a call directly.
   Future<void> _startVideoCall(WidgetRef ref, String? doctorName) async {
     final voice = ref.read(voiceAssistantControllerProvider.notifier);
     final router = ref.read(goRouterProvider);
@@ -116,23 +119,23 @@ class App extends ConsumerWidget {
       return;
     }
 
-    final onlineDoctors = doctors.where((d) => d.isOnline).toList();
-    if (onlineDoctors.isEmpty) {
-      await voice.speak('No doctors are online right now.');
+    final bookableDoctors = doctors.where((d) => d.isBookable).toList();
+    if (bookableDoctors.isEmpty) {
+      await voice.speak('No doctors are available for booking right now.');
       return;
     }
 
     final match = doctorName == null
-        ? onlineDoctors.first
-        : onlineDoctors.firstWhere(
-            (d) => d.name.toLowerCase().contains(doctorName.toLowerCase()),
-            orElse: () => onlineDoctors.first,
+        ? bookableDoctors.first
+        : bookableDoctors.firstWhere(
+            (d) => d.doctorName.toLowerCase().contains(doctorName.toLowerCase()),
+            orElse: () => bookableDoctors.first,
           );
 
     router.pushNamed(
-      RouteNames.videoCall,
-      pathParameters: {'doctorId': match.id},
+      RouteNames.appointmentBooking,
+      pathParameters: {'doctorId': match.doctorId.toString()},
     );
-    await voice.speak('Calling ${match.name}.');
+    await voice.speak("Let's book an appointment with ${match.doctorName}.");
   }
 }

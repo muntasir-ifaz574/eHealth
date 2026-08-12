@@ -12,7 +12,15 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentTab: AppTab.home,
-      appBar: AppBar(title: const Text(AppConstants.appName)),
+      appBar: AppBar(
+        title: const Text(AppConstants.appName),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () => context.pushNamed(RouteNames.profile),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -31,8 +39,26 @@ class HomeScreen extends StatelessWidget {
           _QuickAction(
             icon: Icons.medical_services,
             title: 'Talk to a Doctor',
-            subtitle: 'Start a live video consultation',
+            subtitle: 'Book a live video consultation',
             onTap: () => context.goNamed(RouteNames.doctorList),
+          ),
+          _QuickAction(
+            icon: Icons.event_note,
+            title: 'My Appointments',
+            subtitle: 'View bookings, join calls, and check prescriptions',
+            onTap: () => context.pushNamed(RouteNames.appointmentList),
+          ),
+          _QuickAction(
+            icon: Icons.health_and_safety,
+            title: 'Symptom Checker',
+            subtitle: 'Describe symptoms and get triaged first-aid guidance',
+            onTap: () => context.pushNamed(RouteNames.symptomChecker),
+          ),
+          _QuickAction(
+            icon: Icons.show_chart,
+            title: 'Health Progress',
+            subtitle: 'Track your health trend over time',
+            onTap: () => context.pushNamed(RouteNames.healthProgress),
           ),
           _QuickAction(
             icon: Icons.mic,

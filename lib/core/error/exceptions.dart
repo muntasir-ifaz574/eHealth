@@ -27,3 +27,15 @@ class CacheException implements Exception {
 
   final String message;
 }
+
+class UnauthorizedException implements Exception {
+  const UnauthorizedException([this.message = 'Your session has expired. Please log in again.']);
+
+  final String message;
+}
+
+class ValidationException implements Exception {
+  const ValidationException([this.message = 'Some information you entered is invalid.']);
+
+  final String message;
+}

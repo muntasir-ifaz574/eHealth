@@ -28,6 +28,7 @@ dependencies:
   # Functional error handling
   dartz: ^0.10.1
   equatable: ^2.0.5
+  collection: ^1.19.0
 
   # Location & maps
   google_maps_flutter: ^2.9.0
@@ -47,7 +48,20 @@ dependencies:
 
   # Local persistence / env
   shared_preferences: ^2.3.3
+  flutter_secure_storage: ^9.2.4
   flutter_dotenv: ^5.2.1
+
+  # Auth
+  google_sign_in: ^6.2.2
+
+  # File picking & upload (prescription verification)
+  file_picker: 10.3.8
+
+  # Charts (health progress)
+  fl_chart: ^0.69.2
+
+  # In-app payment checkout
+  webview_flutter: ^4.10.0
 
   # DI helpers
   get_it: ^8.0.2

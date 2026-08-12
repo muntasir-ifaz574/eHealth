@@ -1,19 +1,13 @@
 import 'package:ehealth/core/result/result.dart';
-import 'package:ehealth/features/video_call/domain/entities/call_session.dart';
+import 'package:ehealth/features/video_call/domain/entities/conference_credentials.dart';
 import 'package:ehealth/features/video_call/domain/entities/doctor.dart';
 
 abstract interface class VideoCallRepository {
   Future<Result<List<Doctor>>> getAvailableDoctors();
 
-  Future<Result<Doctor>> getDoctorById(String doctorId);
+  Future<Result<Doctor>> getDoctorById(int doctorId);
 
-  /// Builds a [CallSession] for `caller` to join `doctor` in a shared room.
-  /// A real backend would mint a signed room token here; this scaffold
-  /// derives a deterministic room id so both participants land in the same
-  /// ZEGOCLOUD room.
-  Future<Result<CallSession>> createCallSession({
-    required Doctor doctor,
-    required String callerUserId,
-    required String callerUserName,
-  });
+  /// Fetches the Zego conference credentials for a specific booked
+  /// consultation from the backend (`GET users/consultations/:id/conference`).
+  Future<Result<ConferenceCredentials>> getConferenceCredentials(String consultationId);
 }

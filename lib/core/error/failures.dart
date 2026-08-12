@@ -40,3 +40,11 @@ class CallFailure extends Failure {
 class UnknownFailure extends Failure {
   const UnknownFailure([super.message = 'An unexpected error occurred.']);
 }
+
+class UnauthorizedFailure extends Failure {
+  const UnauthorizedFailure([super.message = 'Your session has expired. Please log in again.']);
+}
+
+class ValidationFailure extends Failure {
+  const ValidationFailure([super.message = 'Some information you entered is invalid.']);
+}

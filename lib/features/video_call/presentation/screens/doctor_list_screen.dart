@@ -31,9 +31,9 @@ class DoctorListScreen extends ConsumerWidget {
               final doctor = doctors[index];
               return DoctorCard(
                 doctor: doctor,
-                onCall: () => context.pushNamed(
-                  RouteNames.videoCall,
-                  pathParameters: {'doctorId': doctor.id},
+                onBook: () => context.pushNamed(
+                  RouteNames.appointmentBooking,
+                  pathParameters: {'doctorId': doctor.doctorId.toString()},
                 ),
               );
             },
