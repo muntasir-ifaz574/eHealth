@@ -31,4 +31,16 @@ class PaymentsRepositoryImpl implements PaymentsRepository {
       return const Left(UnknownFailure());
     }
   }
+
+  @override
+  Future<Result<void>> notifyPaymentSuccess(Map<String, dynamic> data) async {
+    try {
+      await _remoteDataSource.notifyPaymentSuccess(data);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(mapDioException(e));
+    } catch (_) {
+      return const Left(UnknownFailure());
+    }
+  }
 }

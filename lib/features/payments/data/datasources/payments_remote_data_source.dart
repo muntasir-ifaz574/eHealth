@@ -8,6 +8,8 @@ abstract interface class PaymentsRemoteDataSource {
     required int userId,
     required int consultationId,
   });
+
+  Future<void> notifyPaymentSuccess(Map<String, dynamic> data);
 }
 
 class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
@@ -26,5 +28,10 @@ class PaymentsRemoteDataSourceImpl implements PaymentsRemoteDataSource {
       data: {'amount': amount, 'userId': userId, 'consultationId': consultationId},
     );
     return PaymentInitiationModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<void> notifyPaymentSuccess(Map<String, dynamic> data) async {
+    await _dio.post<dynamic>(ApiEndpoints.paymentSuccess, data: data);
   }
 }

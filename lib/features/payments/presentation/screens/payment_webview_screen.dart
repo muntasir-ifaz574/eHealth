@@ -6,11 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-/// Loads the gateway URL returned by `POST doctor/payments/initiate` and
-/// watches for the redirect the gateway sends the browser to afterwards.
-/// The exact redirect URL pattern isn't specified by the backend doc, so
-/// this matches on 'success'/'cancel'/'fail' appearing in the URL — adjust
-/// once the real gateway's redirect URLs are known.
 class PaymentWebViewScreen extends ConsumerStatefulWidget {
   const PaymentWebViewScreen({
     super.key,
@@ -24,12 +19,14 @@ class PaymentWebViewScreen extends ConsumerStatefulWidget {
   final int userId;
 
   @override
-  ConsumerState<PaymentWebViewScreen> createState() => _PaymentWebViewScreenState();
+  ConsumerState<PaymentWebViewScreen> createState() =>
+      _PaymentWebViewScreenState();
 }
 
 class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
   WebViewController? _controller;
   String? _errorMessage;
+  String? _transactionId;
 
   @override
   void initState() {
@@ -38,7 +35,9 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
   }
 
   Future<void> _initiate() async {
-    final result = await ref.read(initiatePaymentProvider).call(
+    final result = await ref
+        .read(initiatePaymentProvider)
+        .call(
           InitiatePaymentParams(
             amount: widget.amount,
             userId: widget.userId,
@@ -46,25 +45,25 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
           ),
         );
     if (!mounted) return;
-    result.fold(
-      (failure) => setState(() => _errorMessage = failure.message),
-      (initiation) {
-        setState(() {
-          _controller = WebViewController()
-            ..setJavaScriptMode(JavaScriptMode.unrestricted)
-            ..setNavigationDelegate(
-              NavigationDelegate(onNavigationRequest: _onNavigationRequest),
-            )
-            ..loadRequest(Uri.parse(initiation.gatewayUrl));
-        });
-      },
-    );
+    result.fold((failure) => setState(() => _errorMessage = failure.message), (
+      initiation,
+    ) {
+      _transactionId = initiation.transactionId;
+      setState(() {
+        _controller = WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setNavigationDelegate(
+            NavigationDelegate(onNavigationRequest: _onNavigationRequest),
+          )
+          ..loadRequest(Uri.parse(initiation.gatewayUrl));
+      });
+    });
   }
 
   NavigationDecision _onNavigationRequest(NavigationRequest request) {
     final url = request.url.toLowerCase();
     if (url.contains('success')) {
-      _goToResult(success: true);
+      _confirmSuccessAndNavigate(request.url);
       return NavigationDecision.prevent;
     }
     if (url.contains('cancel') || url.contains('fail')) {
@@ -72,6 +71,17 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
       return NavigationDecision.prevent;
     }
     return NavigationDecision.navigate;
+  }
+
+  Future<void> _confirmSuccessAndNavigate(String redirectUrl) async {
+    final queryParams = Uri.parse(redirectUrl).queryParameters;
+    await ref.read(confirmPaymentSuccessProvider).call({
+      ...queryParams,
+      'consultationId': widget.consultationId,
+      if (_transactionId != null) 'tran_id': _transactionId,
+    });
+    if (!mounted) return;
+    _goToResult(success: true);
   }
 
   void _goToResult({required bool success}) {
@@ -93,8 +103,8 @@ class _PaymentWebViewScreenState extends ConsumerState<PaymentWebViewScreen> {
               ),
             )
           : _controller == null
-              ? const Center(child: CircularProgressIndicator())
-              : WebViewWidget(controller: _controller!),
+          ? const Center(child: CircularProgressIndicator())
+          : WebViewWidget(controller: _controller!),
     );
   }
 }

@@ -7,4 +7,6 @@ abstract interface class PaymentsRepository {
     required int userId,
     required int consultationId,
   });
+
+  Future<Result<void>> notifyPaymentSuccess(Map<String, dynamic> data);
 }
