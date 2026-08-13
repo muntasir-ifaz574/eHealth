@@ -47,6 +47,160 @@ class _DoctorListScreenState extends ConsumerState<DoctorListScreen> {
     );
   }
 
+  void _showDoctorProfileSheet(BuildContext context, Doctor doctor) {
+    final words = doctor.doctorName.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty);
+    final initials = words.map((w) => w[0]).take(2).join().toUpperCase();
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surfaceContainerLowest,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusCard)),
+      ),
+      builder: (bottomSheetContext) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.65,
+          maxChildSize: 0.9,
+          minChildSize: 0.4,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.marginMobile),
+              child: ListView(
+                controller: scrollController,
+                children: [
+                  const SizedBox(height: AppSpacing.sm),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.outlineVariant,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    children: [
+                      Container(
+                        width: 72,
+                        height: 72,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.electricBlue.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          initials,
+                          style: AppTextStyles.headlineXl.copyWith(color: AppColors.electricBlue),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(doctor.doctorName, style: AppTextStyles.headlineXl),
+                            const SizedBox(height: 4),
+                            Text(
+                              doctor.specialization ?? 'General Physician',
+                              style: AppTextStyles.bodyMd.copyWith(
+                                color: AppColors.electricBlue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (doctor.qualifications != null && doctor.qualifications!.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                doctor.qualifications!,
+                                style: AppTextStyles.bodySm.copyWith(
+                                  color: AppColors.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (doctor.bio != null && doctor.bio!.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    Text('About Doctor', style: AppTextStyles.headlineMd),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      doctor.bio!,
+                      style: AppTextStyles.bodyMd.copyWith(
+                        color: AppColors.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                  if (doctor.services.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    Text('Consultation Options', style: AppTextStyles.headlineMd),
+                    const SizedBox(height: AppSpacing.xs),
+                    for (final service in doctor.services)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+                          border: Border.all(color: AppColors.outlineVariant),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(service.serviceName, style: AppTextStyles.headlineLg),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Duration: ${service.durationHours}H',
+                                  style: AppTextStyles.bodySm.copyWith(
+                                    color: AppColors.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '৳${service.totalCost}',
+                              style: AppTextStyles.headlineLg.copyWith(
+                                color: AppColors.electricBlue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                  const SizedBox(height: AppSpacing.xl),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: doctor.isBookable
+                          ? () {
+                              Navigator.pop(bottomSheetContext);
+                              _openBooking(doctor);
+                            }
+                          : null,
+                      icon: const Icon(Icons.calendar_today, size: 18),
+                      label: Text(
+                        doctor.isBookable ? 'Book Appointment' : 'Doctor Unavailable',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final doctorsAsync = ref.watch(availableDoctorsProvider);
@@ -130,7 +284,7 @@ class _DoctorListScreenState extends ConsumerState<DoctorListScreen> {
                     ),
                     child: DoctorCard(
                       doctor: doctor,
-                      onViewProfile: () => _openBooking(doctor),
+                      onViewProfile: () => _showDoctorProfileSheet(context, doctor),
                       onBook: () => _openBooking(doctor),
                     ),
                   ),
