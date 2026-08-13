@@ -18,8 +18,6 @@ class Hospital extends Equatable {
   final String address;
   final double latitude;
   final double longitude;
-
-  /// The hospital's own emergency contact number, when Google returns one.
   final String? phoneNumber;
   final double? rating;
   final bool? isOpenNow;
@@ -40,5 +38,12 @@ class Hospital extends Equatable {
   }
 
   @override
-  List<Object?> get props => [placeId, name, address, latitude, longitude, phoneNumber];
+  List<Object?> get props => [
+    placeId,
+    name,
+    address,
+    latitude,
+    longitude,
+    phoneNumber,
+  ];
 }

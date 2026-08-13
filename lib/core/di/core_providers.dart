@@ -8,12 +8,15 @@ import 'package:ehealth/core/storage/token_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Overridden in `main()` once `SharedPreferences.getInstance()` resolves.
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('sharedPreferencesProvider must be overridden in main()');
+  throw UnimplementedError(
+    'sharedPreferencesProvider must be overridden in main()',
+  );
 });
 
-final tokenStorageProvider = Provider<TokenStorage>((ref) => const TokenStorage());
+final tokenStorageProvider = Provider<TokenStorage>(
+  (ref) => const TokenStorage(),
+);
 
 final dioProvider = Provider<Dio>((ref) {
   return DioClient(

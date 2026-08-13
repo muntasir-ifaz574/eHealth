@@ -5,10 +5,6 @@ import 'package:ehealth/core/error/exceptions.dart';
 import 'package:ehealth/features/prescriptions/domain/entities/prescription.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Caches a prescription's file on disk (in app-private storage, so no
-/// storage permission is needed) and resolves the direct-download form of
-/// `fileRef` when it's a Google Drive share link, since Drive's "view" URL
-/// serves an HTML viewer page rather than the raw file over a plain GET.
 abstract interface class PrescriptionFileDataSource {
   Future<String?> findCachedFile(Prescription prescription);
 

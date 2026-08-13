@@ -64,17 +64,16 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
       ),
-      dividerTheme: const DividerThemeData(color: AppColors.outlineVariant, thickness: 1, space: 1),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.outlineVariant,
+        thickness: 1,
+        space: 1,
+      ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.electricBlue,
           foregroundColor: AppColors.onPrimary,
           textStyle: AppTextStyles.button,
-          // A finite minimum, not Size.fromHeight (== infinite width) — that
-          // forced every button to demand unbounded width by default, which
-          // crashes any button placed directly in a Row/other unconstrained
-          // parent. Screens that want a full-width CTA already wrap it in
-          // their own SizedBox(width: double.infinity, ...) explicitly.
           minimumSize: const Size(64, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
@@ -86,11 +85,6 @@ abstract final class AppTheme {
           foregroundColor: AppColors.charcoalDeep,
           side: const BorderSide(color: AppColors.charcoalDeep, width: 1.5),
           textStyle: AppTextStyles.button,
-          // A finite minimum, not Size.fromHeight (== infinite width) — that
-          // forced every button to demand unbounded width by default, which
-          // crashes any button placed directly in a Row/other unconstrained
-          // parent. Screens that want a full-width CTA already wrap it in
-          // their own SizedBox(width: double.infinity, ...) explicitly.
           minimumSize: const Size(64, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
@@ -108,7 +102,10 @@ abstract final class AppTheme {
         fillColor: AppColors.surfaceContainerLowest,
         labelStyle: AppTextStyles.labelCaps,
         hintStyle: AppTextStyles.bodyMd.copyWith(color: AppColors.outline),
-        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.sm,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
           borderSide: const BorderSide(color: AppColors.outlineVariant),
@@ -142,19 +139,27 @@ abstract final class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return AppTextStyles.bodySm.copyWith(
-            color: selected ? AppColors.electricBlue : AppColors.onSurfaceVariant,
+            color: selected
+                ? AppColors.electricBlue
+                : AppColors.onSurfaceVariant,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return IconThemeData(color: selected ? AppColors.electricBlue : AppColors.onSurfaceVariant);
+          return IconThemeData(
+            color: selected
+                ? AppColors.electricBlue
+                : AppColors.onSurfaceVariant,
+          );
         }),
       ),
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         fillColor: WidgetStateProperty.resolveWith((states) {
-          return states.contains(WidgetState.selected) ? AppColors.electricBlue : Colors.transparent;
+          return states.contains(WidgetState.selected)
+              ? AppColors.electricBlue
+              : Colors.transparent;
         }),
         side: const BorderSide(color: AppColors.outlineVariant),
       ),
@@ -166,16 +171,27 @@ abstract final class AppTheme {
       seedColor: AppColors.electricBlue,
       brightness: Brightness.dark,
     );
-    // DESIGN.md only defines light-mode tokens; dark mode derives a
-    // contrast-correct Material3 scheme from the same accent color instead
-    // of reusing the light theme's hardcoded (light-mode) text colors.
-    final textTheme = GoogleFonts.interTextTheme(ThemeData(brightness: Brightness.dark).textTheme)
-        .copyWith(
-      headlineLarge: GoogleFonts.hankenGrotesk(fontSize: 28, fontWeight: FontWeight.w700),
-      headlineMedium: GoogleFonts.hankenGrotesk(fontSize: 24, fontWeight: FontWeight.w600),
-      headlineSmall: GoogleFonts.hankenGrotesk(fontSize: 22, fontWeight: FontWeight.w600),
-      labelSmall: GoogleFonts.jetBrainsMono(fontSize: 12, letterSpacing: 1.2),
-    );
+    final textTheme =
+        GoogleFonts.interTextTheme(
+          ThemeData(brightness: Brightness.dark).textTheme,
+        ).copyWith(
+          headlineLarge: GoogleFonts.hankenGrotesk(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+          ),
+          headlineMedium: GoogleFonts.hankenGrotesk(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+          headlineSmall: GoogleFonts.hankenGrotesk(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+          ),
+          labelSmall: GoogleFonts.jetBrainsMono(
+            fontSize: 12,
+            letterSpacing: 1.2,
+          ),
+        );
 
     return ThemeData(
       useMaterial3: true,

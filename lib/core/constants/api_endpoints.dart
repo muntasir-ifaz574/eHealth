@@ -1,5 +1,3 @@
-/// Relative paths (resolved against `Env.apiBaseUrl` by the shared [Dio]
-/// instance) for every endpoint in `api_documentation_for_mobile_app_clientside.md`.
 abstract final class ApiEndpoints {
   static const String registration = 'users/registration';
   static const String login = 'users/login';

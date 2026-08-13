@@ -10,10 +10,6 @@ class ConferenceCredentialsModel extends ConferenceCredentials {
   });
 
   factory ConferenceCredentialsModel.fromJson(Map<String, dynamic> json) {
-    // The backend has been observed returning appId/serverSecret with
-    // stray trailing whitespace, which is invalid for ZEGO's auth and
-    // leaves the native engine uninitialized (every call then fails with
-    // "on a null object reference") — trim defensively.
     return ConferenceCredentialsModel(
       appId: int.parse(json['appId'].toString().trim()),
       serverSecret: (json['serverSecret'] as String).trim(),

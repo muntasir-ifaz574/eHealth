@@ -14,12 +14,16 @@ class Prescription extends Equatable {
   final int consultationId;
   final String fileRef;
   final String fileName;
-  // The backend sometimes returns an empty `dateInfo: {}` with no
-  // createdAt/updatedAt at all — these are not reliably present.
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
   @override
-  List<Object?> get props =>
-      [prescriptionId, consultationId, fileRef, fileName, createdAt, updatedAt];
+  List<Object?> get props => [
+    prescriptionId,
+    consultationId,
+    fileRef,
+    fileName,
+    createdAt,
+    updatedAt,
+  ];
 }

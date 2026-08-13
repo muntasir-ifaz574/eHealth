@@ -2,8 +2,6 @@ import 'package:ehealth/core/error/failures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Shared loading/error/data rendering for an [AsyncValue] so every screen
-/// doesn't reimplement the same `when(...)` boilerplate.
 class AsyncValueWidget<T> extends StatelessWidget {
   const AsyncValueWidget({
     super.key,
@@ -44,6 +42,8 @@ class AsyncValueWidget<T> extends StatelessWidget {
   String _messageOf(Object error) {
     if (error is Failure) return error.message;
     final message = error.toString();
-    return message.startsWith('Instance of') ? 'Something went wrong.' : message;
+    return message.startsWith('Instance of')
+        ? 'Something went wrong.'
+        : message;
   }
 }

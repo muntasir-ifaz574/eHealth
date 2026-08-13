@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Persistent shell for the four top-level tabs (Home / Appointment / AI /
-/// Profile), built once by [StatefulShellRoute.indexedStack] and kept alive
-/// across tab switches — only the active branch's content swaps internally,
-/// so this bottom nav bar itself never rebuilds when tapping between tabs.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
 

@@ -1,11 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// Every action the voice assistant can trigger across the app.
-///
-/// Kept as a sealed class (rather than scattering string checks through the
-/// UI) so every feature that wants to be voice-controllable just adds a case
-/// here and a handler in `VoiceCommandListener` — the interpreter stays the
-/// single source of truth for "what can be said".
 sealed class VoiceIntent extends Equatable {
   const VoiceIntent();
 

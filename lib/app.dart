@@ -165,9 +165,6 @@ class App extends ConsumerWidget {
     }
   }
 
-  /// There's no ad-hoc/instant call anymore — every call is tied to a
-  /// booked consultation — so a voice request to "call" a doctor starts
-  /// that doctor's booking flow instead of joining a call directly.
   Future<void> _startVideoCall(WidgetRef ref, String? doctorName) async {
     final voice = ref.read(voiceAssistantControllerProvider.notifier);
     final router = ref.read(goRouterProvider);
@@ -186,9 +183,6 @@ class App extends ConsumerWidget {
       return;
     }
 
-    // Strip filler words ("a cardiologist" / "the cardiologist") so free-form
-    // speech like "call a cardiologist" can match on specialization, not
-    // just on a doctor's name.
     final query = doctorName
         ?.replaceFirst(RegExp(r'^(a|an|the)\s+'), '')
         .trim();

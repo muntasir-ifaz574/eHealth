@@ -1,12 +1,6 @@
 import 'package:ehealth/core/usecase/usecase.dart';
 import 'package:ehealth/features/voice_assistant/domain/entities/voice_intent.dart';
 
-/// Pure keyword-based NLU: turns raw recognized speech into a [VoiceIntent].
-///
-/// Kept dependency-free and synchronous so it's trivial to unit test and so
-/// every new voice-controllable action only requires adding a pattern here
-/// plus a case in `VoiceCommandListener` — no plugin or navigation code
-/// leaks into the domain layer.
 class InterpretVoiceCommand implements SyncUseCase<VoiceIntent, String> {
   const InterpretVoiceCommand();
 

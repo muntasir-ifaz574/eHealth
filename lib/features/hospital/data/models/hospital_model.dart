@@ -1,7 +1,5 @@
 import 'package:ehealth/features/hospital/domain/entities/hospital.dart';
 
-/// Maps Google Places API JSON (Nearby Search / Place Details) onto the
-/// domain [Hospital] entity.
 class HospitalModel extends Hospital {
   const HospitalModel({
     required super.placeId,
@@ -23,7 +21,10 @@ class HospitalModel extends Hospital {
     return HospitalModel(
       placeId: json['place_id'] as String? ?? '',
       name: json['name'] as String? ?? 'Unknown hospital',
-      address: json['vicinity'] as String? ?? json['formatted_address'] as String? ?? '',
+      address:
+          json['vicinity'] as String? ??
+          json['formatted_address'] as String? ??
+          '',
       latitude: (location?['lat'] as num?)?.toDouble() ?? 0,
       longitude: (location?['lng'] as num?)?.toDouble() ?? 0,
       rating: (json['rating'] as num?)?.toDouble(),
@@ -41,7 +42,8 @@ class HospitalModel extends Hospital {
       address: json['formatted_address'] as String? ?? '',
       latitude: (location?['lat'] as num?)?.toDouble() ?? 0,
       longitude: (location?['lng'] as num?)?.toDouble() ?? 0,
-      phoneNumber: json['international_phone_number'] as String? ??
+      phoneNumber:
+          json['international_phone_number'] as String? ??
           json['formatted_phone_number'] as String?,
       rating: (json['rating'] as num?)?.toDouble(),
     );

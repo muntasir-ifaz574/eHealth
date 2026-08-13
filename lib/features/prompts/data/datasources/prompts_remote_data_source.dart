@@ -31,8 +31,6 @@ class PromptsRemoteDataSourceImpl implements PromptsRemoteDataSource {
   }) async {
     final response = await _dio.get<Map<String, dynamic>>(
       ApiEndpoints.getPrompts,
-      // The backend requires `limit` on every request (unlike `afterCursor`,
-      // which is genuinely optional) — default it instead of omitting it.
       queryParameters: {'afterCursor': ?afterCursor, 'limit': limit ?? 20},
     );
     final data = response.data!;

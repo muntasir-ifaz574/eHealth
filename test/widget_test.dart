@@ -6,9 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// No platform channel is registered for `flutter_secure_storage` in a
-/// widget test, so the auth bootstrap this app runs on every route change
-/// needs an in-memory stand-in instead of the real secure storage.
 class _FakeTokenStorage extends TokenStorage {
   final Map<String, String> _values = {};
 
@@ -45,13 +42,10 @@ void main() {
         child: const App(),
       ),
     );
-    // The router's auth redirect resolves asynchronously (even for the
-    // splash route itself), so give it a frame before asserting on content.
     await tester.pump();
 
     expect(find.text('eHealth'), findsOneWidget);
 
-    // Let the splash screen's navigation timer fire before the test ends.
     await tester.pump(const Duration(seconds: 1));
   });
 }

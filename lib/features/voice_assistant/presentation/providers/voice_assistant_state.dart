@@ -15,10 +15,6 @@ class VoiceAssistantState extends Equatable {
   final VoiceStatus status;
   final String transcript;
   final String? lastResponse;
-
-  /// Set once per recognized command; the presentation-layer listener
-  /// consumes it (via `clearPendingIntent`) after acting on it so the same
-  /// intent never fires twice on rebuild.
   final VoiceIntent? pendingIntent;
   final String? errorMessage;
 
@@ -37,11 +33,19 @@ class VoiceAssistantState extends Equatable {
       status: status ?? this.status,
       transcript: transcript ?? this.transcript,
       lastResponse: lastResponse ?? this.lastResponse,
-      pendingIntent: clearPendingIntent ? null : (pendingIntent ?? this.pendingIntent),
+      pendingIntent: clearPendingIntent
+          ? null
+          : (pendingIntent ?? this.pendingIntent),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
   @override
-  List<Object?> get props => [status, transcript, lastResponse, pendingIntent, errorMessage];
+  List<Object?> get props => [
+    status,
+    transcript,
+    lastResponse,
+    pendingIntent,
+    errorMessage,
+  ];
 }

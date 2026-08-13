@@ -10,7 +10,5 @@ abstract interface class PrescriptionsRepository {
     required String filePath,
   });
 
-  /// Returns the prescription's file on local disk, downloading it first if
-  /// it hasn't been cached yet.
   Future<Result<String>> resolveLocalFile(Prescription prescription);
 }

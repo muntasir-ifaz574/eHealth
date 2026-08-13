@@ -40,8 +40,6 @@ String _formatDateTime(DateTime utc) {
   return '$day $month ${date.year} $hour:$minute $period';
 }
 
-/// Ongoing/upcoming/past, using `endTime` when the backend provides it and
-/// falling back to `startTime + service.durationHours` when it doesn't.
 _Status _statusOf(Appointment appointment) {
   final start = appointment.startTime;
   if (start == null) return _Status.unknown;
@@ -63,8 +61,11 @@ bool _canJoinCall(Appointment appointment) {
   if (start == null) return true;
 
   final now = DateTime.now();
-  final end = appointment.endTime ??
-      start.add(Duration(minutes: (appointment.service.durationHours * 60).round()));
+  final end =
+      appointment.endTime ??
+      start.add(
+        Duration(minutes: (appointment.service.durationHours * 60).round()),
+      );
   final joinWindowStart = start.subtract(const Duration(minutes: 5));
 
   return !now.isBefore(joinWindowStart) && now.isBefore(end);
@@ -234,14 +235,12 @@ class _AppointmentCard extends StatelessWidget {
               Expanded(
                 child: FilledButton.icon(
                   style: FilledButton.styleFrom(
-                    // Styled to look disabled when the join window hasn't
-                    // opened yet, but `onPressed` stays live either way —
-                    // a truly disabled button (onPressed: null) never fires
-                    // a tap at all, so it couldn't show the toast below.
-                    backgroundColor:
-                        canJoin ? AppColors.electricBlue : AppColors.outlineVariant,
-                    foregroundColor:
-                        canJoin ? AppColors.onPrimary : AppColors.onSurfaceVariant,
+                    backgroundColor: canJoin
+                        ? AppColors.electricBlue
+                        : AppColors.outlineVariant,
+                    foregroundColor: canJoin
+                        ? AppColors.onPrimary
+                        : AppColors.onSurfaceVariant,
                     textStyle: AppTextStyles.button,
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(

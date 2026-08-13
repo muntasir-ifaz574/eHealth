@@ -585,8 +585,6 @@ class _FirstAidCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  // The backend sometimes sends `firstAid` as a plain
-                  // string with no title — fall back to a generic heading.
                   firstAid.title.isNotEmpty
                       ? firstAid.title
                       : (isHigh

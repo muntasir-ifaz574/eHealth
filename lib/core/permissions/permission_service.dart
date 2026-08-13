@@ -1,8 +1,5 @@
 import 'package:permission_handler/permission_handler.dart';
 
-/// Central place to request the runtime permissions the app relies on:
-/// location (nearby hospitals), microphone (voice commands + calls) and
-/// camera (video calls).
 class PermissionService {
   const PermissionService();
 

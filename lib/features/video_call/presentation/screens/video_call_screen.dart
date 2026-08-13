@@ -8,14 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
-/// Full-screen live video call powered by the ZEGOCLOUD prebuilt call UI kit.
-/// Session identity (consultationId/userId/userName) comes from the backend's
-/// per-consultation conference response, but `appID`/`appSign` come from the
-/// local `.env` instead of `credentials.appId`/`credentials.serverSecret` —
-/// the backend's `serverSecret` is a 32-char ZEGO ServerSecret (meant to stay
-/// server-side and mint short-lived tokens), not a valid 64-char AppSign, so
-/// the SDK rejects it (`createEngine` error 1001001). Revert to the backend
-/// values once it returns a real AppSign or a generated Kit Token instead.
 class VideoCallScreen extends ConsumerWidget {
   const VideoCallScreen({super.key, required this.consultationId});
 
@@ -55,9 +47,6 @@ class VideoCallScreen extends ConsumerWidget {
                 ..background = Container(color: AppColors.charcoalDeep)
                 ..bottomMenuBar.backgroundColor = AppColors.charcoalDeep
                     .withValues(alpha: 0.55)
-                // The Android activity doesn't declare PiP support
-                // (android:supportsPictureInPicture), so backgrounding would
-                // otherwise repeatedly throw setPictureInPictureParams errors.
                 ..pip.enableWhenBackground = false;
 
               return ZegoUIKitPrebuiltCall(

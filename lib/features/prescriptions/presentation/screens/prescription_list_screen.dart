@@ -12,8 +12,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 const _months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 String _formatDate(DateTime? date) {
@@ -28,17 +38,24 @@ class PrescriptionListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final prescriptionsAsync = ref.watch(prescriptionsForConsultationProvider(consultationId));
+    final prescriptionsAsync = ref.watch(
+      prescriptionsForConsultationProvider(consultationId),
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Prescriptions')),
       body: AsyncValueWidget(
         value: prescriptionsAsync,
-        onRetry: () => ref.invalidate(prescriptionsForConsultationProvider(consultationId)),
+        onRetry: () => ref.invalidate(
+          prescriptionsForConsultationProvider(consultationId),
+        ),
         data: (prescriptions) {
           if (prescriptions.isEmpty) {
             return Center(
-              child: Text('No prescriptions for this consultation yet.', style: AppTextStyles.bodyMd),
+              child: Text(
+                'No prescriptions for this consultation yet.',
+                style: AppTextStyles.bodyMd,
+              ),
             );
           }
           return ListView(
@@ -74,10 +91,10 @@ class _PrescriptionRowState extends ConsumerState<_PrescriptionRow> {
   PrescriptionVerification? _verifyResult;
   String? _errorMessage;
 
-  /// Resolves the prescription's own stored file — from the local cache if
-  /// it's already been downloaded, otherwise downloading it first.
   Future<String?> _resolveLocalFile() async {
-    final result = await ref.read(getLocalPrescriptionFileProvider).call(widget.prescription);
+    final result = await ref
+        .read(getLocalPrescriptionFileProvider)
+        .call(widget.prescription);
     return result.fold((failure) {
       setState(() => _errorMessage = failure.message);
       return null;
@@ -114,7 +131,9 @@ class _PrescriptionRowState extends ConsumerState<_PrescriptionRow> {
       return;
     }
 
-    final result = await ref.read(verifyPrescriptionProvider).call(
+    final result = await ref
+        .read(verifyPrescriptionProvider)
+        .call(
           VerifyPrescriptionParams(
             prescriptionId: widget.prescription.prescriptionId.toString(),
             filePath: path,
@@ -152,7 +171,10 @@ class _PrescriptionRowState extends ConsumerState<_PrescriptionRow> {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.medication, color: AppColors.electricBlue),
+                child: const Icon(
+                  Icons.medication,
+                  color: AppColors.electricBlue,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -161,19 +183,28 @@ class _PrescriptionRowState extends ConsumerState<_PrescriptionRow> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.description, size: 18, color: AppColors.onSurfaceVariant),
+                        const Icon(
+                          Icons.description,
+                          size: 18,
+                          color: AppColors.onSurfaceVariant,
+                        ),
                         const SizedBox(width: AppSpacing.xs / 2),
                         Expanded(
                           child: Text(
                             prescription.fileName,
-                            style: AppTextStyles.bodyLg.copyWith(fontWeight: FontWeight.w600),
+                            style: AppTextStyles.bodyLg.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xs / 2),
-                    Text('Issued: ${_formatDate(prescription.createdAt)}', style: AppTextStyles.bodySm),
+                    Text(
+                      'Issued: ${_formatDate(prescription.createdAt)}',
+                      style: AppTextStyles.bodySm,
+                    ),
                   ],
                 ),
               ),
@@ -203,7 +234,10 @@ class _PrescriptionRowState extends ConsumerState<_PrescriptionRow> {
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
                       : const Text('Verify'),
                 ),
@@ -212,7 +246,10 @@ class _PrescriptionRowState extends ConsumerState<_PrescriptionRow> {
           ),
           if (_errorMessage != null) ...[
             const SizedBox(height: AppSpacing.xs),
-            Text(_errorMessage!, style: AppTextStyles.bodySm.copyWith(color: AppColors.triageHigh)),
+            Text(
+              _errorMessage!,
+              style: AppTextStyles.bodySm.copyWith(color: AppColors.triageHigh),
+            ),
           ],
           if (_verifyResult != null) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -251,19 +288,31 @@ class _VerificationResultCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.xs),
               Text(
                 matched ? 'Verified Match' : 'Not Verified',
-                style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.w600, color: color),
+                style: AppTextStyles.bodyMd.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
             ],
           ),
           if (!matched) ...[
             const SizedBox(height: AppSpacing.xs / 2),
-            Text('Mismatch Detected', style: AppTextStyles.labelCaps.copyWith(color: color)),
+            Text(
+              'Mismatch Detected',
+              style: AppTextStyles.labelCaps.copyWith(color: color),
+            ),
           ],
           const SizedBox(height: AppSpacing.xs),
           Text('File hash: ${result.fileHash}', style: AppTextStyles.labelCaps),
-          Text('Stored hash: ${result.storedHash}', style: AppTextStyles.labelCaps),
+          Text(
+            'Stored hash: ${result.storedHash}',
+            style: AppTextStyles.labelCaps,
+          ),
           if (result.blockchainTxHash != null)
-            Text('Tx: ${result.blockchainTxHash}', style: AppTextStyles.labelCaps),
+            Text(
+              'Tx: ${result.blockchainTxHash}',
+              style: AppTextStyles.labelCaps,
+            ),
         ],
       ),
     );

@@ -8,8 +8,6 @@ import 'package:go_router/go_router.dart';
 
 enum _PaymentMethod { card, mobileBanking, netBanking }
 
-/// Pre-payment review step matching the mockup's checkout screen. Pushes to
-/// [RouteNames.paymentCheckout] (the real SSLCOMMERZ webview) on confirm.
 class PaymentReviewScreen extends StatefulWidget {
   const PaymentReviewScreen({
     super.key,
@@ -27,8 +25,6 @@ class PaymentReviewScreen extends StatefulWidget {
 }
 
 class _PaymentReviewScreenState extends State<PaymentReviewScreen> {
-  // Purely visual/local state — InitiatePaymentDto has no payment-method
-  // field, so this selection doesn't change the actual payment call.
   _PaymentMethod _method = _PaymentMethod.card;
 
   void _payNow() {
@@ -68,9 +64,14 @@ class _PaymentReviewScreenState extends State<PaymentReviewScreen> {
                         padding: const EdgeInsets.all(AppSpacing.xs),
                         decoration: BoxDecoration(
                           color: AppColors.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusButton,
+                          ),
                         ),
-                        child: const Icon(Icons.medical_services_outlined, color: AppColors.electricBlue),
+                        child: const Icon(
+                          Icons.medical_services_outlined,
+                          color: AppColors.electricBlue,
+                        ),
                       ),
                     ],
                   ),
@@ -81,9 +82,14 @@ class _PaymentReviewScreenState extends State<PaymentReviewScreen> {
                     children: [
                       Text(
                         'Total Amount',
-                        style: AppTextStyles.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+                        style: AppTextStyles.bodyMd.copyWith(
+                          color: AppColors.onSurfaceVariant,
+                        ),
                       ),
-                      Text('৳${widget.amount}', style: AppTextStyles.headlineXl),
+                      Text(
+                        '৳${widget.amount}',
+                        style: AppTextStyles.headlineXl,
+                      ),
                     ],
                   ),
                 ],
@@ -124,7 +130,11 @@ class _PaymentReviewScreenState extends State<PaymentReviewScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock, size: 16, color: AppColors.onSurfaceVariant),
+                const Icon(
+                  Icons.lock,
+                  size: 16,
+                  color: AppColors.onSurfaceVariant,
+                ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   'Payments processed securely via SSLCOMMERZ',
@@ -156,9 +166,13 @@ class _PaymentReviewScreenState extends State<PaymentReviewScreen> {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
-          color: selected ? AppColors.surfaceContainerLow : AppColors.surfaceContainerLowest,
+          color: selected
+              ? AppColors.surfaceContainerLow
+              : AppColors.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
-          border: Border.all(color: selected ? AppColors.electricBlue : AppColors.outlineVariant),
+          border: Border.all(
+            color: selected ? AppColors.electricBlue : AppColors.outlineVariant,
+          ),
         ),
         child: Row(
           children: [
@@ -169,7 +183,12 @@ class _PaymentReviewScreenState extends State<PaymentReviewScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.w500)),
+                  Text(
+                    title,
+                    style: AppTextStyles.bodyMd.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   Text(subtitle, style: AppTextStyles.bodySm),
                 ],
               ),

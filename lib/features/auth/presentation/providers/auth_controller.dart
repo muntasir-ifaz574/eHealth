@@ -10,14 +10,13 @@ class AuthController extends Notifier<AuthState> {
 
   @override
   AuthState build() => const AuthState();
-
-  /// Restores a persisted session with no network call. Safe to call more
-  /// than once — subsequent calls await the same in-flight bootstrap.
   Future<void> bootstrap() {
     return _bootstrapFuture ??= () async {
       final user = await ref.read(authRepositoryProvider).restoreSession();
       state = AuthState(
-        status: user != null ? AuthStatus.authenticated : AuthStatus.unauthenticated,
+        status: user != null
+            ? AuthStatus.authenticated
+            : AuthStatus.unauthenticated,
         user: user,
       );
     }();
@@ -30,25 +29,35 @@ class AuthController extends Notifier<AuthState> {
   }) async {
     state = state.copyWith(status: AuthStatus.authenticating, clearError: true);
     final result = await ref.read(registerUserProvider)(
-      RegisterUserParams(userName: userName, userEmail: userEmail, userPassword: userPassword),
+      RegisterUserParams(
+        userName: userName,
+        userEmail: userEmail,
+        userPassword: userPassword,
+      ),
     );
-    return result.fold(
-      (failure) {
-        state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: failure.message);
-        return false;
-      },
-      (_) => true,
-    );
+    return result.fold((failure) {
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+        errorMessage: failure.message,
+      );
+      return false;
+    }, (_) => true);
   }
 
-  Future<bool> login({required String userEmail, required String userPassword}) async {
+  Future<bool> login({
+    required String userEmail,
+    required String userPassword,
+  }) async {
     state = state.copyWith(status: AuthStatus.authenticating, clearError: true);
     final result = await ref.read(loginUserProvider)(
       LoginUserParams(userEmail: userEmail, userPassword: userPassword),
     );
     return result.fold(
       (failure) {
-        state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: failure.message);
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          errorMessage: failure.message,
+        );
         return false;
       },
       (user) {
@@ -58,14 +67,17 @@ class AuthController extends Notifier<AuthState> {
     );
   }
 
-  /// Wired for when a real Google OAuth client id is configured; currently
-  /// unreachable from the UI (the login screen's Google button is disabled).
   Future<bool> googleOAuth(String idToken) async {
     state = state.copyWith(status: AuthStatus.authenticating, clearError: true);
-    final result = await ref.read(googleOAuthLoginProvider)(GoogleOAuthLoginParams(idToken));
+    final result = await ref.read(googleOAuthLoginProvider)(
+      GoogleOAuthLoginParams(idToken),
+    );
     return result.fold(
       (failure) {
-        state = state.copyWith(status: AuthStatus.unauthenticated, errorMessage: failure.message);
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          errorMessage: failure.message,
+        );
         return false;
       },
       (user) {

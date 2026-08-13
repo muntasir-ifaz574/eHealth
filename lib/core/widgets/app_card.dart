@@ -3,9 +3,6 @@ import 'package:ehealth/core/theme/app_shadows.dart';
 import 'package:ehealth/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 
-/// The design system's card: white, 16px radius, level-1 micro-shadow, no
-/// border at rest. Used for appointment/doctor/prescription list items and
-/// any other grouped-content container.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,

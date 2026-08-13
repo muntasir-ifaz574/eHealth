@@ -45,7 +45,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       userPassword: _passwordController.text,
     );
     if (!registered) return;
-    // Registration doesn't return a token, so log in immediately after.
     final loggedIn = await auth.login(
       userEmail: _emailController.text.trim(),
       userPassword: _passwordController.text,
@@ -97,12 +96,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Text('Create Account', style: AppTextStyles.headlineLg),
+                              Text(
+                                'Create Account',
+                                style: AppTextStyles.headlineLg,
+                              ),
                               const SizedBox(height: AppSpacing.xs),
                               Text(
                                 'Secure your access to ${AppConstants.appName}',
-                                style:
-                                    AppTextStyles.bodySm.copyWith(color: AppColors.onSurfaceVariant),
+                                style: AppTextStyles.bodySm.copyWith(
+                                  color: AppColors.onSurfaceVariant,
+                                ),
                               ),
                               const SizedBox(height: AppSpacing.md),
                               TextFormField(
@@ -112,7 +115,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   hintText: 'Jane Doe',
                                   prefixIcon: Icon(Icons.person_outline),
                                 ),
-                                validator: (value) => (value == null || value.trim().length < 4)
+                                validator: (value) =>
+                                    (value == null || value.trim().length < 4)
                                     ? 'At least 4 characters'
                                     : null,
                               ),
@@ -125,7 +129,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   hintText: 'jane@example.com',
                                   prefixIcon: Icon(Icons.mail_outline),
                                 ),
-                                validator: (value) => (value == null || !value.contains('@'))
+                                validator: (value) =>
+                                    (value == null || !value.contains('@'))
                                     ? 'Enter a valid email'
                                     : null,
                               ),
@@ -139,13 +144,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   prefixIcon: const Icon(Icons.lock_outline),
                                   suffixIcon: IconButton(
                                     icon: Icon(
-                                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                      _obscurePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
                                     ),
-                                    onPressed: () =>
-                                        setState(() => _obscurePassword = !_obscurePassword),
+                                    onPressed: () => setState(
+                                      () =>
+                                          _obscurePassword = !_obscurePassword,
+                                    ),
                                   ),
                                 ),
-                                validator: (value) => (value == null || value.length < 4)
+                                validator: (value) =>
+                                    (value == null || value.length < 4)
                                     ? 'At least 4 characters'
                                     : null,
                               ),
@@ -155,15 +165,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 children: [
                                   Checkbox(
                                     value: _agreedToTerms,
-                                    onChanged: (value) =>
-                                        setState(() => _agreedToTerms = value ?? false),
+                                    onChanged: (value) => setState(
+                                      () => _agreedToTerms = value ?? false,
+                                    ),
                                   ),
                                   Expanded(
                                     child: Padding(
-                                      padding: const EdgeInsets.only(top: AppSpacing.xs),
+                                      padding: const EdgeInsets.only(
+                                        top: AppSpacing.xs,
+                                      ),
                                       child: GestureDetector(
-                                        onTap: () =>
-                                            setState(() => _agreedToTerms = !_agreedToTerms),
+                                        onTap: () => setState(
+                                          () =>
+                                              _agreedToTerms = !_agreedToTerms,
+                                        ),
                                         child: Text(
                                           'I agree to the Terms of Service and Privacy Policy.',
                                           style: AppTextStyles.bodySm,
@@ -177,20 +192,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 const SizedBox(height: AppSpacing.xs),
                                 Text(
                                   authState.errorMessage!,
-                                  style: AppTextStyles.bodySm.copyWith(color: AppColors.error),
+                                  style: AppTextStyles.bodySm.copyWith(
+                                    color: AppColors.error,
+                                  ),
                                 ),
                               ],
                               const SizedBox(height: AppSpacing.sm),
                               FilledButton(
-                                onPressed: (isSubmitting || !_agreedToTerms) ? null : _submit,
+                                onPressed: (isSubmitting || !_agreedToTerms)
+                                    ? null
+                                    : _submit,
                                 child: isSubmitting
                                     ? const SizedBox(
                                         height: 20,
                                         width: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
                                       )
                                     : const Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Text('Create Account'),
@@ -202,8 +224,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               const SizedBox(height: AppSpacing.md),
                               Center(
                                 child: TextButton(
-                                  onPressed: () => context.goNamed(RouteNames.login),
-                                  child: const Text('Already have an account? Login here'),
+                                  onPressed: () =>
+                                      context.goNamed(RouteNames.login),
+                                  child: const Text(
+                                    'Already have an account? Login here',
+                                  ),
                                 ),
                               ),
                             ],

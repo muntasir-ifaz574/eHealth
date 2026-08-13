@@ -1,8 +1,5 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// Typed access to the values loaded from `.env` by [DotEnv].
-///
-/// Call [Env.load] once in `main()` before `runApp`.
 abstract final class Env {
   static Future<void> load() => dotenv.load(fileName: '.env');
 

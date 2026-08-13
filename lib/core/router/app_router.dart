@@ -28,22 +28,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Notifies [GoRouter] to re-run `redirect` for the current location
-/// whenever the auth session changes, without recreating the router itself.
-/// `redirect` calls `bootstrap()`, which mutates `authControllerProvider` —
-/// watching that provider directly from `goRouterProvider` would tear down
-/// and rebuild the router mid-redirect, disposing the `ref` the in-flight
-/// callback depends on.
 class _GoRouterRefreshListenable extends ChangeNotifier {
   void refresh() => notifyListeners();
 }
 
-final _goRouterRefreshListenableProvider = Provider<_GoRouterRefreshListenable>((ref) {
-  final listenable = _GoRouterRefreshListenable();
-  ref.listen(authControllerProvider, (previous, next) => listenable.refresh());
-  ref.onDispose(listenable.dispose);
-  return listenable;
-});
+final _goRouterRefreshListenableProvider = Provider<_GoRouterRefreshListenable>(
+  (ref) {
+    final listenable = _GoRouterRefreshListenable();
+    ref.listen(
+      authControllerProvider,
+      (previous, next) => listenable.refresh(),
+    );
+    ref.onDispose(listenable.dispose);
+    return listenable;
+  },
+);
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -58,7 +57,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       final isAuthenticated = ref.read(authControllerProvider).isAuthenticated;
       final isAuthRoute =
-          state.matchedLocation == RoutePaths.login || state.matchedLocation == RoutePaths.register;
+          state.matchedLocation == RoutePaths.login ||
+          state.matchedLocation == RoutePaths.register;
 
       if (!isAuthenticated && !isAuthRoute) return RoutePaths.login;
       if (isAuthenticated && isAuthRoute) return RoutePaths.home;
@@ -85,11 +85,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: RouteNames.welcome,
         builder: (context, state) => const WelcomeScreen(),
       ),
-      // The four bottom-nav tabs live in one persistent shell — built once by
-      // AppShell and kept alive across tab switches, so the nav bar itself
-      // never rebuilds when tapping between Home/Appointment/AI/Profile.
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) => AppShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) =>
+            AppShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -142,9 +140,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: ':placeId',
             name: RouteNames.hospitalDetail,
-            builder: (context, state) => HospitalDetailScreen(
-              placeId: state.pathParameters['placeId']!,
-            ),
+            builder: (context, state) =>
+                HospitalDetailScreen(placeId: state.pathParameters['placeId']!),
           ),
         ],
       ),
@@ -225,7 +222,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         name: RouteNames.paymentResult,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>? ?? const {};
-          return PaymentResultScreen(success: extra['success'] as bool? ?? false);
+          return PaymentResultScreen(
+            success: extra['success'] as bool? ?? false,
+          );
         },
       ),
     ],
