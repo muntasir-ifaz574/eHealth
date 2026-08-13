@@ -33,6 +33,16 @@ const _commands = [
     result: 'Ends the current video call',
   ),
   _VoiceCommand(
+    icon: Icons.mic_off,
+    phrases: ['mute', 'unmute', 'turn on/off microphone'],
+    result: 'Mutes/unmutes the microphone during a call',
+  ),
+  _VoiceCommand(
+    icon: Icons.videocam_off,
+    phrases: ['turn on/off camera', 'switch camera', 'flip camera'],
+    result: 'Toggles or flips the camera during a call',
+  ),
+  _VoiceCommand(
     icon: Icons.map,
     phrases: ['show map', 'hospital map', 'map view', 'show hospitals on map'],
     result: 'Opens the hospital map',
@@ -63,16 +73,47 @@ const _commands = [
       'call doctor <name>',
       'video call <name>',
       'talk to doctor <name>',
-      'call <name>',
+      'call <name/specialization>',
     ],
     result:
-        'Opens the booking screen for that doctor (fuzzy-matched by name; '
-        'defaults to the first bookable doctor if no name matches)',
+        'Opens the booking screen for that doctor (fuzzy-matched by name or '
+        'specialization, e.g. "call a cardiologist"; defaults to the first '
+        'bookable doctor if nothing matches)',
+  ),
+  _VoiceCommand(
+    icon: Icons.event_note,
+    phrases: [
+      'my appointments',
+      'show appointments',
+      'appointment list',
+      'upcoming appointments',
+    ],
+    result: 'Opens your appointments',
+  ),
+  _VoiceCommand(
+    icon: Icons.person,
+    phrases: ['my profile', 'open profile', 'show profile'],
+    result: 'Opens your profile',
+  ),
+  _VoiceCommand(
+    icon: Icons.health_and_safety,
+    phrases: ['symptom checker', 'check my symptoms', 'check symptoms'],
+    result: 'Opens the symptom checker',
+  ),
+  _VoiceCommand(
+    icon: Icons.show_chart,
+    phrases: ['health progress', 'my progress', 'show my progress'],
+    result: 'Opens your health progress',
   ),
   _VoiceCommand(
     icon: Icons.replay,
     phrases: ['repeat', 'say again', 'what did you say'],
     result: "Repeats the assistant's last spoken response",
+  ),
+  _VoiceCommand(
+    icon: Icons.help_outline,
+    phrases: ['what can i say', 'voice commands', 'help'],
+    result: 'Opens this screen',
   ),
   _VoiceCommand(
     icon: Icons.home,

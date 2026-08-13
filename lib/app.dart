@@ -11,7 +11,13 @@ import 'package:ehealth/features/voice_assistant/presentation/providers/voice_as
 import 'package:ehealth/features/voice_assistant/presentation/widgets/draggable_mic_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+
+bool _isFrontFacingCamera = true;
+
+bool _isOnCallScreen(GoRouter router) =>
+    router.state.name == RouteNames.videoCall;
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -95,6 +101,55 @@ class App extends ConsumerWidget {
           endedCall ? 'Call ended.' : "You're not in a call right now.",
         );
 
+      case SetMicrophoneIntent(:final turnOn):
+        if (!_isOnCallScreen(router)) {
+          await voice.speak("You're not in a call right now.");
+        } else {
+          ZegoUIKitPrebuiltCallController().audioVideo.microphone.turnOn(
+            turnOn,
+          );
+          await voice.speak(turnOn ? 'Microphone on.' : 'Microphone muted.');
+        }
+
+      case SetCameraIntent(:final turnOn):
+        if (!_isOnCallScreen(router)) {
+          await voice.speak("You're not in a call right now.");
+        } else {
+          ZegoUIKitPrebuiltCallController().audioVideo.camera.turnOn(turnOn);
+          await voice.speak(turnOn ? 'Camera on.' : 'Camera off.');
+        }
+
+      case SwitchCameraIntent():
+        if (!_isOnCallScreen(router)) {
+          await voice.speak("You're not in a call right now.");
+        } else {
+          _isFrontFacingCamera = !_isFrontFacingCamera;
+          ZegoUIKitPrebuiltCallController().audioVideo.camera.switchFrontFacing(
+            _isFrontFacingCamera,
+          );
+          await voice.speak('Switching camera.');
+        }
+
+      case NavigateToAppointmentsIntent():
+        router.pushNamed(RouteNames.appointmentList);
+        await voice.speak('Here are your appointments.');
+
+      case NavigateToProfileIntent():
+        router.pushNamed(RouteNames.profile);
+        await voice.speak('Opening your profile.');
+
+      case NavigateToSymptomCheckerIntent():
+        router.pushNamed(RouteNames.symptomChecker);
+        await voice.speak('Opening the symptom checker.');
+
+      case NavigateToHealthProgressIntent():
+        router.pushNamed(RouteNames.healthProgress);
+        await voice.speak('Here is your health progress.');
+
+      case ShowVoiceCommandsHelpIntent():
+        router.pushNamed(RouteNames.voiceCommands);
+        await voice.speak('Here is what you can say.');
+
       case StopListeningIntent():
         await voice.stopListening();
 
@@ -131,11 +186,21 @@ class App extends ConsumerWidget {
       return;
     }
 
-    final match = doctorName == null
+    // Strip filler words ("a cardiologist" / "the cardiologist") so free-form
+    // speech like "call a cardiologist" can match on specialization, not
+    // just on a doctor's name.
+    final query = doctorName
+        ?.replaceFirst(RegExp(r'^(a|an|the)\s+'), '')
+        .trim();
+    final match = query == null || query.isEmpty
         ? bookableDoctors.first
         : bookableDoctors.firstWhere(
             (d) =>
-                d.doctorName.toLowerCase().contains(doctorName.toLowerCase()),
+                d.doctorName.toLowerCase().contains(query.toLowerCase()) ||
+                (d.specialization?.toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ??
+                    false),
             orElse: () => bookableDoctors.first,
           );
 

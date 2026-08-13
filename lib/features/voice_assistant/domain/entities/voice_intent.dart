@@ -46,6 +46,48 @@ class EndCallIntent extends VoiceIntent {
   const EndCallIntent();
 }
 
+class SetMicrophoneIntent extends VoiceIntent {
+  const SetMicrophoneIntent({required this.turnOn});
+
+  final bool turnOn;
+
+  @override
+  List<Object?> get props => [turnOn];
+}
+
+class SetCameraIntent extends VoiceIntent {
+  const SetCameraIntent({required this.turnOn});
+
+  final bool turnOn;
+
+  @override
+  List<Object?> get props => [turnOn];
+}
+
+class SwitchCameraIntent extends VoiceIntent {
+  const SwitchCameraIntent();
+}
+
+class NavigateToAppointmentsIntent extends VoiceIntent {
+  const NavigateToAppointmentsIntent();
+}
+
+class NavigateToProfileIntent extends VoiceIntent {
+  const NavigateToProfileIntent();
+}
+
+class NavigateToSymptomCheckerIntent extends VoiceIntent {
+  const NavigateToSymptomCheckerIntent();
+}
+
+class NavigateToHealthProgressIntent extends VoiceIntent {
+  const NavigateToHealthProgressIntent();
+}
+
+class ShowVoiceCommandsHelpIntent extends VoiceIntent {
+  const ShowVoiceCommandsHelpIntent();
+}
+
 class StopListeningIntent extends VoiceIntent {
   const StopListeningIntent();
 }
