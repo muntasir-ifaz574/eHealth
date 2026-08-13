@@ -17,7 +17,18 @@ import 'package:go_router/go_router.dart';
 
 const _weekdayAbbrev = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const _monthAbbrev = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 String _formatTime(TimeOfDay time) {
@@ -39,10 +50,12 @@ class AppointmentBookingScreen extends ConsumerStatefulWidget {
   final int doctorId;
 
   @override
-  ConsumerState<AppointmentBookingScreen> createState() => _AppointmentBookingScreenState();
+  ConsumerState<AppointmentBookingScreen> createState() =>
+      _AppointmentBookingScreenState();
 }
 
-class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScreen> {
+class _AppointmentBookingScreenState
+    extends ConsumerState<AppointmentBookingScreen> {
   late final List<DateTime> _days = List.generate(
     7,
     (i) => DateTime.now().add(Duration(days: i)),
@@ -56,7 +69,13 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
   DateTime? get _startTime {
     final time = _selectedTime;
     if (time == null) return null;
-    return DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day, time.hour, time.minute);
+    return DateTime(
+      _selectedDay.year,
+      _selectedDay.month,
+      _selectedDay.day,
+      time.hour,
+      time.minute,
+    );
   }
 
   Future<void> _confirmBooking() async {
@@ -76,7 +95,9 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
     }
 
     setState(() => _isSubmitting = true);
-    final result = await ref.read(bookAppointmentProvider).call(
+    final result = await ref
+        .read(bookAppointmentProvider)
+        .call(
           BookAppointmentParams(
             doctorId: widget.doctorId,
             serviceId: service.serviceId,
@@ -97,7 +118,9 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
         final userId = ref.read(authControllerProvider).user?.userId;
         context.pushNamed(
           RouteNames.paymentReview,
-          pathParameters: {'consultationId': confirmation.consultationId.toString()},
+          pathParameters: {
+            'consultationId': confirmation.consultationId.toString(),
+          },
           extra: {'amount': service.totalCost, 'userId': userId},
         );
       },
@@ -125,7 +148,8 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
 
   Widget _buildBody(Doctor doctor) {
     final activeServices = doctor.services.where((s) => s.isActive).toList();
-    final canConfirm = _selectedService != null && _startTime != null && !_isSubmitting;
+    final canConfirm =
+        _selectedService != null && _startTime != null && !_isSubmitting;
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.marginMobile),
@@ -142,15 +166,23 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
               ),
               child: Text(
                 _initialsOf(doctor.doctorName),
-                style: AppTextStyles.headlineXl.copyWith(color: AppColors.electricBlue),
+                style: AppTextStyles.headlineXl.copyWith(
+                  color: AppColors.electricBlue,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(doctor.doctorName, style: AppTextStyles.headlineXl, textAlign: TextAlign.center),
+            Text(
+              doctor.doctorName,
+              style: AppTextStyles.headlineXl,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 4),
             Text(
               doctor.specialization ?? 'General Physician',
-              style: AppTextStyles.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
+              style: AppTextStyles.bodyMd.copyWith(
+                color: AppColors.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -192,10 +224,14 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: selected ? AppColors.surfaceContainerLow : AppColors.surfaceContainerLowest,
+            color: selected
+                ? AppColors.surfaceContainerLow
+                : AppColors.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
             border: Border.all(
-              color: selected ? AppColors.electricBlue : AppColors.outlineVariant,
+              color: selected
+                  ? AppColors.electricBlue
+                  : AppColors.outlineVariant,
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -209,7 +245,9 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
                     const SizedBox(height: 4),
                     Text(
                       '${service.durationHours}H • ৳${service.totalCost}',
-                      style: AppTextStyles.labelCaps.copyWith(color: AppColors.electricBlue),
+                      style: AppTextStyles.labelCaps.copyWith(
+                        color: AppColors.electricBlue,
+                      ),
                     ),
                   ],
                 ),
@@ -239,10 +277,8 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
             onTap: () => setState(() {
               _selectedDay = day;
-              // A time picked for a later day can end up in the past once the
-              // user switches back to today — drop it rather than let an
-              // invalid combination reach the confirm button.
-              if (_selectedTime != null && !_isTimeValidForDay(_selectedTime!, day)) {
+              if (_selectedTime != null &&
+                  !_isTimeValidForDay(_selectedTime!, day)) {
                 _selectedTime = null;
               }
             }),
@@ -250,9 +286,13 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
               width: 56,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: selected ? AppColors.electricBlue : AppColors.surfaceContainerLowest,
+                color: selected
+                    ? AppColors.electricBlue
+                    : AppColors.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-                border: selected ? null : Border.all(color: AppColors.outlineVariant),
+                border: selected
+                    ? null
+                    : Border.all(color: AppColors.outlineVariant),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -260,7 +300,9 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
                   Text(
                     _weekdayAbbrev[day.weekday - 1].toUpperCase(),
                     style: AppTextStyles.labelCaps.copyWith(
-                      color: selected ? AppColors.onPrimary : AppColors.onSurfaceVariant,
+                      color: selected
+                          ? AppColors.onPrimary
+                          : AppColors.onSurfaceVariant,
                       fontSize: 10,
                     ),
                   ),
@@ -268,7 +310,9 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
                   Text(
                     '${day.day}',
                     style: AppTextStyles.headlineLg.copyWith(
-                      color: selected ? AppColors.onPrimary : AppColors.onSurface,
+                      color: selected
+                          ? AppColors.onPrimary
+                          : AppColors.onSurface,
                     ),
                   ),
                 ],
@@ -292,25 +336,40 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
           onTap: _pickTime,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.sm,
+            ),
             decoration: BoxDecoration(
-              color: time != null ? AppColors.electricBlue.withValues(alpha: 0.1) : Colors.transparent,
+              color: time != null
+                  ? AppColors.electricBlue.withValues(alpha: 0.1)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-              border: Border.all(color: time != null ? AppColors.electricBlue : AppColors.outlineVariant),
+              border: Border.all(
+                color: time != null
+                    ? AppColors.electricBlue
+                    : AppColors.outlineVariant,
+              ),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.access_time,
                   size: 20,
-                  color: time != null ? AppColors.electricBlue : AppColors.onSurfaceVariant,
+                  color: time != null
+                      ? AppColors.electricBlue
+                      : AppColors.onSurfaceVariant,
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 Text(
                   time == null ? 'Select a time' : _formatTime(time),
                   style: AppTextStyles.bodySm.copyWith(
-                    color: time != null ? AppColors.electricBlue : AppColors.onSurface,
-                    fontWeight: time != null ? FontWeight.w600 : FontWeight.w400,
+                    color: time != null
+                        ? AppColors.electricBlue
+                        : AppColors.onSurface,
+                    fontWeight: time != null
+                        ? FontWeight.w600
+                        : FontWeight.w400,
                   ),
                 ),
               ],
@@ -322,7 +381,13 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
   }
 
   bool _isTimeValidForDay(TimeOfDay time, DateTime day) {
-    final candidate = DateTime(day.year, day.month, day.day, time.hour, time.minute);
+    final candidate = DateTime(
+      day.year,
+      day.month,
+      day.day,
+      time.hour,
+      time.minute,
+    );
     return candidate.isAfter(DateTime.now());
   }
 
@@ -358,7 +423,10 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
           const SizedBox(height: AppSpacing.sm),
           _buildSummaryRow('Service', service?.serviceName ?? '—'),
           const SizedBox(height: 4),
-          _buildSummaryRow('Date & Time', startTime == null ? '—' : _formatDateTime(startTime)),
+          _buildSummaryRow(
+            'Date & Time',
+            startTime == null ? '—' : _formatDateTime(startTime),
+          ),
           const Divider(height: AppSpacing.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -366,7 +434,9 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
               Text('Total', style: AppTextStyles.headlineLg),
               Text(
                 service == null ? '৳—' : '৳${service.totalCost}',
-                style: AppTextStyles.headlineLg.copyWith(color: AppColors.electricBlue),
+                style: AppTextStyles.headlineLg.copyWith(
+                  color: AppColors.electricBlue,
+                ),
               ),
             ],
           ),
@@ -379,8 +449,16 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: AppTextStyles.bodyMd.copyWith(color: AppColors.onSurfaceVariant)),
-        Text(value, style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: AppTextStyles.bodyMd.copyWith(
+            color: AppColors.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          value,
+          style: AppTextStyles.bodyMd.copyWith(fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }
