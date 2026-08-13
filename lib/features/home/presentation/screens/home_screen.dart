@@ -58,12 +58,6 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.marginMobile),
         children: [
-          Text(
-            'Say "find hospital", "call doctor", or tap the mic — the app '
-            'can be fully controlled by voice.',
-            style: AppTextStyles.bodyMd.copyWith(color: AppColors.onSurfaceVariant),
-          ),
-          const SizedBox(height: AppSpacing.sm),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

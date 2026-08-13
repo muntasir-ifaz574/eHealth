@@ -15,4 +15,9 @@ abstract interface class VoiceRepository {
   Future<Result<void>> stopListening();
 
   Future<Result<void>> speak(String message);
+
+  void setEngineListeners({
+    void Function()? onListeningStopped,
+    void Function(String message, bool permanent)? onError,
+  });
 }

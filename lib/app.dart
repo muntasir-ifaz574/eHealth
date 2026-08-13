@@ -11,6 +11,7 @@ import 'package:ehealth/features/voice_assistant/presentation/providers/voice_as
 import 'package:ehealth/features/voice_assistant/presentation/widgets/draggable_mic_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -83,8 +84,16 @@ class App extends ConsumerWidget {
         await _startVideoCall(ref, doctorName);
 
       case EndCallIntent():
-        if (router.canPop()) router.pop();
-        await voice.speak('Call ended.');
+        final callContext = router.routerDelegate.navigatorKey.currentContext;
+        final endedCall =
+            callContext != null &&
+            await ZegoUIKitPrebuiltCallController().hangUp(
+              callContext,
+              showConfirmation: false,
+            );
+        await voice.speak(
+          endedCall ? 'Call ended.' : "You're not in a call right now.",
+        );
 
       case StopListeningIntent():
         await voice.stopListening();
@@ -125,7 +134,8 @@ class App extends ConsumerWidget {
     final match = doctorName == null
         ? bookableDoctors.first
         : bookableDoctors.firstWhere(
-            (d) => d.doctorName.toLowerCase().contains(doctorName.toLowerCase()),
+            (d) =>
+                d.doctorName.toLowerCase().contains(doctorName.toLowerCase()),
             orElse: () => bookableDoctors.first,
           );
 

@@ -13,7 +13,15 @@ class VoiceAssistantController extends Notifier<VoiceAssistantState> {
   bool _continuousMode = false;
 
   @override
-  VoiceAssistantState build() => const VoiceAssistantState();
+  VoiceAssistantState build() {
+    ref
+        .read(voiceRepositoryProvider)
+        .setEngineListeners(
+          onListeningStopped: _onEngineListeningStopped,
+          onError: _onEngineError,
+        );
+    return const VoiceAssistantState();
+  }
 
   Future<void> toggleListening() async {
     if (_continuousMode || state.isListening) {
@@ -74,6 +82,31 @@ class VoiceAssistantController extends Notifier<VoiceAssistantState> {
   /// `state.pendingIntent`, so the same command doesn't re-fire on rebuild.
   void clearPendingIntent() {
     state = state.copyWith(clearPendingIntent: true);
+  }
+
+  void _onEngineListeningStopped() {
+    if (state.status != VoiceStatus.listening) return;
+    if (_continuousMode) {
+      startListening();
+    } else {
+      state = state.copyWith(status: VoiceStatus.idle);
+    }
+  }
+
+  void _onEngineError(String message, bool permanent) {
+    if (state.status != VoiceStatus.listening &&
+        state.status != VoiceStatus.initializing) {
+      return;
+    }
+    if (_continuousMode && !permanent) {
+      startListening();
+      return;
+    }
+    _continuousMode = false;
+    state = state.copyWith(
+      status: VoiceStatus.error,
+      errorMessage: 'Voice recognition error: $message',
+    );
   }
 
   Future<void> speak(String message) async {

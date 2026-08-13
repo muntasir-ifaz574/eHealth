@@ -55,6 +55,15 @@ class VoiceRepositoryImpl implements VoiceRepository {
   }
 
   @override
+  void setEngineListeners({
+    void Function()? onListeningStopped,
+    void Function(String message, bool permanent)? onError,
+  }) {
+    _speech.onListeningStopped = onListeningStopped;
+    _speech.onErrorOccurred = onError;
+  }
+
+  @override
   Future<Result<void>> speak(String message) async {
     try {
       await _tts.speak(message);

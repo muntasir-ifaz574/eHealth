@@ -4,6 +4,7 @@ import 'package:ehealth/core/theme/app_spacing.dart';
 import 'package:ehealth/core/theme/app_text_styles.dart';
 import 'package:ehealth/core/widgets/app_card.dart';
 import 'package:ehealth/core/widgets/async_value_widget.dart';
+import 'package:ehealth/core/widgets/top_toast.dart';
 import 'package:ehealth/features/appointments/domain/usecases/book_appointment.dart';
 import 'package:ehealth/features/appointments/presentation/providers/appointments_providers.dart';
 import 'package:ehealth/features/auth/presentation/providers/auth_providers.dart';
@@ -17,19 +18,6 @@ import 'package:go_router/go_router.dart';
 const _weekdayAbbrev = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const _monthAbbrev = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-];
-
-// No real availability endpoint exists yet, so these are just hardcoded
-// candidate slots the user picks from.
-const _morningSlots = [
-  TimeOfDay(hour: 9, minute: 0),
-  TimeOfDay(hour: 10, minute: 30),
-  TimeOfDay(hour: 11, minute: 15),
-];
-const _afternoonSlots = [
-  TimeOfDay(hour: 13, minute: 0),
-  TimeOfDay(hour: 14, minute: 45),
-  TimeOfDay(hour: 16, minute: 0),
 ];
 
 String _formatTime(TimeOfDay time) {
@@ -76,6 +64,17 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
     final startTime = _startTime;
     if (service == null || startTime == null) return;
 
+    if (startTime.isBefore(DateTime.now())) {
+      setState(() => _selectedTime = null);
+      showTopToast(
+        context,
+        'That time has passed — please pick a new one.',
+        icon: Icons.error_outline,
+        color: AppColors.error,
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
     final result = await ref.read(bookAppointmentProvider).call(
           BookAppointmentParams(
@@ -88,7 +87,12 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
     setState(() => _isSubmitting = false);
 
     result.fold(
-      (failure) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(failure.message))),
+      (failure) => showTopToast(
+        context,
+        failure.message,
+        icon: Icons.error_outline,
+        color: AppColors.error,
+      ),
       (confirmation) {
         final userId = ref.read(authControllerProvider).user?.userId;
         context.pushNamed(
@@ -160,9 +164,7 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
         const SizedBox(height: AppSpacing.sm),
         _buildDayStrip(),
         const SizedBox(height: AppSpacing.sm),
-        _buildTimeGroup('MORNING', _morningSlots),
-        const SizedBox(height: AppSpacing.sm),
-        _buildTimeGroup('AFTERNOON', _afternoonSlots),
+        _buildTimeSelector(),
         const SizedBox(height: AppSpacing.lg),
         _buildSummary(),
         const SizedBox(height: AppSpacing.md),
@@ -235,7 +237,15 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
           final selected = _isSameDay(day, _selectedDay);
           return InkWell(
             borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-            onTap: () => setState(() => _selectedDay = day),
+            onTap: () => setState(() {
+              _selectedDay = day;
+              // A time picked for a later day can end up in the past once the
+              // user switches back to today — drop it rather than let an
+              // invalid combination reach the confirm button.
+              if (_selectedTime != null && !_isTimeValidForDay(_selectedTime!, day)) {
+                _selectedTime = null;
+              }
+            }),
             child: Container(
               width: 56,
               alignment: Alignment.center,
@@ -270,44 +280,70 @@ class _AppointmentBookingScreenState extends ConsumerState<AppointmentBookingScr
     );
   }
 
-  Widget _buildTimeGroup(String label, List<TimeOfDay> slots) {
+  Widget _buildTimeSelector() {
+    final time = _selectedTime;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.labelCaps),
+        Text('TIME', style: AppTextStyles.labelCaps),
         const SizedBox(height: AppSpacing.xs),
-        Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
-          children: [
-            for (final slot in slots) _buildTimeChip(slot),
-          ],
+        InkWell(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+          onTap: _pickTime,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: time != null ? AppColors.electricBlue.withValues(alpha: 0.1) : Colors.transparent,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
+              border: Border.all(color: time != null ? AppColors.electricBlue : AppColors.outlineVariant),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.access_time,
+                  size: 20,
+                  color: time != null ? AppColors.electricBlue : AppColors.onSurfaceVariant,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  time == null ? 'Select a time' : _formatTime(time),
+                  style: AppTextStyles.bodySm.copyWith(
+                    color: time != null ? AppColors.electricBlue : AppColors.onSurface,
+                    fontWeight: time != null ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildTimeChip(TimeOfDay slot) {
-    final selected = _selectedTime == slot;
-    return InkWell(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-      onTap: () => setState(() => _selectedTime = slot),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.electricBlue.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusButton),
-          border: Border.all(color: selected ? AppColors.electricBlue : AppColors.outlineVariant),
-        ),
-        child: Text(
-          _formatTime(slot),
-          style: AppTextStyles.bodySm.copyWith(
-            color: selected ? AppColors.electricBlue : AppColors.onSurface,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
-      ),
+  bool _isTimeValidForDay(TimeOfDay time, DateTime day) {
+    final candidate = DateTime(day.year, day.month, day.day, time.hour, time.minute);
+    return candidate.isAfter(DateTime.now());
+  }
+
+  Future<void> _pickTime() async {
+    final now = DateTime.now();
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? TimeOfDay.fromDateTime(now),
     );
+    if (picked == null || !mounted) return;
+
+    if (!_isTimeValidForDay(picked, _selectedDay)) {
+      showTopToast(
+        context,
+        'Please select a time later than now.',
+        icon: Icons.error_outline,
+        color: AppColors.error,
+      );
+      return;
+    }
+    setState(() => _selectedTime = picked);
   }
 
   Widget _buildSummary() {
