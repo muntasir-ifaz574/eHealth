@@ -7,7 +7,7 @@ abstract interface class VideoCallRepository {
 
   Future<Result<Doctor>> getDoctorById(int doctorId);
 
-  /// Fetches the Zego conference credentials for a specific booked
-  /// consultation from the backend (`GET users/consultations/:id/conference`).
-  Future<Result<ConferenceCredentials>> getConferenceCredentials(String consultationId);
+  Future<Result<ConferenceCredentials>> getConferenceCredentials(
+    String consultationId,
+  );
 }

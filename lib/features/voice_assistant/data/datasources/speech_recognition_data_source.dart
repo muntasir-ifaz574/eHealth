@@ -2,7 +2,6 @@ import 'package:ehealth/core/error/exceptions.dart';
 import 'package:ehealth/features/voice_assistant/domain/entities/voice_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-/// Thin wrapper over the `speech_to_text` plugin.
 class SpeechRecognitionDataSource {
   SpeechRecognitionDataSource({SpeechToText? speechToText})
     : _speech = speechToText ?? SpeechToText();

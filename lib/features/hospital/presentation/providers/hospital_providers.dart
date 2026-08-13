@@ -8,7 +8,9 @@ import 'package:ehealth/features/hospital/domain/usecases/get_nearby_hospitals.d
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
-final hospitalRemoteDataSourceProvider = Provider<HospitalRemoteDataSource>((ref) {
+final hospitalRemoteDataSourceProvider = Provider<HospitalRemoteDataSource>((
+  ref,
+) {
   return HospitalRemoteDataSourceImpl(ref.watch(dioProvider));
 });
 
@@ -27,9 +29,12 @@ final getHospitalDetailsProvider = Provider<GetHospitalDetails>((ref) {
   return GetHospitalDetails(ref.watch(hospitalRepositoryProvider));
 });
 
-/// Current device position, requesting permission on first read.
-final currentPositionProvider = FutureProvider.autoDispose<Position>((ref) async {
-  final permissionGranted = await ref.watch(permissionServiceProvider).requestLocation();
+final currentPositionProvider = FutureProvider.autoDispose<Position>((
+  ref,
+) async {
+  final permissionGranted = await ref
+      .watch(permissionServiceProvider)
+      .requestLocation();
   if (!permissionGranted) {
     throw StateError('Location permission was denied.');
   }
@@ -38,16 +43,23 @@ final currentPositionProvider = FutureProvider.autoDispose<Position>((ref) async
   );
 });
 
-final nearbyHospitalsProvider = FutureProvider.autoDispose<List<Hospital>>((ref) async {
+final nearbyHospitalsProvider = FutureProvider.autoDispose<List<Hospital>>((
+  ref,
+) async {
   final position = await ref.watch(currentPositionProvider.future);
-  final result = await ref.watch(getNearbyHospitalsProvider).call(
-        GetNearbyHospitalsParams(latitude: position.latitude, longitude: position.longitude),
+  final result = await ref
+      .watch(getNearbyHospitalsProvider)
+      .call(
+        GetNearbyHospitalsParams(
+          latitude: position.latitude,
+          longitude: position.longitude,
+        ),
       );
   return result.fold((failure) => throw failure, (hospitals) => hospitals);
 });
 
-final hospitalDetailsProvider =
-    FutureProvider.autoDispose.family<Hospital, String>((ref, placeId) async {
-  final result = await ref.watch(getHospitalDetailsProvider).call(placeId);
-  return result.fold((failure) => throw failure, (hospital) => hospital);
-});
+final hospitalDetailsProvider = FutureProvider.autoDispose
+    .family<Hospital, String>((ref, placeId) async {
+      final result = await ref.watch(getHospitalDetailsProvider).call(placeId);
+      return result.fold((failure) => throw failure, (hospital) => hospital);
+    });

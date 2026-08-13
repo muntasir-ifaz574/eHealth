@@ -1,6 +1,5 @@
 import 'package:flutter_tts/flutter_tts.dart';
 
-/// Thin wrapper over the `flutter_tts` plugin.
 class TextToSpeechDataSource {
   TextToSpeechDataSource({FlutterTts? flutterTts})
     : _tts = flutterTts ?? FlutterTts() {

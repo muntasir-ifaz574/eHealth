@@ -4,8 +4,6 @@ import 'package:ehealth/features/voice_assistant/presentation/providers/voice_as
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Global floating mic button — tap to start/stop voice control. Placed in
-/// [AppShell] so every screen using the shell can be driven by voice.
 class VoiceMicButton extends ConsumerWidget {
   const VoiceMicButton({super.key});
 
@@ -13,7 +11,9 @@ class VoiceMicButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(voiceAssistantControllerProvider);
     final isListening = state.status == VoiceStatus.listening;
-    final isBusy = state.status == VoiceStatus.initializing || state.status == VoiceStatus.processing;
+    final isBusy =
+        state.status == VoiceStatus.initializing ||
+        state.status == VoiceStatus.processing;
 
     return FloatingActionButton(
       heroTag: 'voiceMicButton',
@@ -21,13 +21,18 @@ class VoiceMicButton extends ConsumerWidget {
       foregroundColor: Colors.white,
       onPressed: isBusy
           ? null
-          : () => ref.read(voiceAssistantControllerProvider.notifier).toggleListening(),
+          : () => ref
+                .read(voiceAssistantControllerProvider.notifier)
+                .toggleListening(),
       tooltip: isListening ? 'Stop voice command' : 'Speak a command',
       child: isBusy
           ? const SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
             )
           : Icon(isListening ? Icons.mic : Icons.mic_none),
     );

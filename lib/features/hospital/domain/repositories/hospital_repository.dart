@@ -8,6 +8,5 @@ abstract interface class HospitalRepository {
     int radiusMeters,
   });
 
-  /// Fetches full details (notably the phone number) for a single hospital.
   Future<Result<Hospital>> getHospitalDetails(String placeId);
 }

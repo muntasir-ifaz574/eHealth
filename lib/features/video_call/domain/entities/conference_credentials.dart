@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-/// Everything the ZEGOCLOUD call widget needs to join a room, minted by the
-/// backend for one specific booked consultation (`UserConferenceResponseDTO`).
 class ConferenceCredentials extends Equatable {
   const ConferenceCredentials({
     required this.appId,
@@ -18,5 +16,11 @@ class ConferenceCredentials extends Equatable {
   final String userName;
 
   @override
-  List<Object?> get props => [appId, serverSecret, consultationId, userId, userName];
+  List<Object?> get props => [
+    appId,
+    serverSecret,
+    consultationId,
+    userId,
+    userName,
+  ];
 }

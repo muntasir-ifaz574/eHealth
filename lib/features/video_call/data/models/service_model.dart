@@ -23,8 +23,6 @@ class ServiceModel extends Service {
     );
   }
 
-  /// The backend serializes decimal columns (e.g. `costPerHour`, `totalCost`)
-  /// as strings (`"10.00"`) rather than JSON numbers.
   static num _parseNum(dynamic value) {
     if (value is num) return value;
     return num.parse(value as String);

@@ -78,8 +78,6 @@ class VoiceAssistantController extends Notifier<VoiceAssistantState> {
     state = state.copyWith(status: VoiceStatus.idle, pendingIntent: intent);
   }
 
-  /// Called by [VoiceCommandListener] right after it has acted on
-  /// `state.pendingIntent`, so the same command doesn't re-fire on rebuild.
   void clearPendingIntent() {
     state = state.copyWith(clearPendingIntent: true);
   }

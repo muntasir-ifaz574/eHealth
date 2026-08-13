@@ -151,8 +151,6 @@ class _SymptomCheckerScreenState extends ConsumerState<SymptomCheckerScreen> {
     _scrollToBottom();
   }
 
-  /// What gets read aloud for a HIGH-priority result — the actionable
-  /// first-aid guidance itself, not the triage label.
   String _spokenTextFor(PromptResult result) {
     final firstAid = result.firstAid;
     if (firstAid != null && firstAid.steps.isNotEmpty) {
